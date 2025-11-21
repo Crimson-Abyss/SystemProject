@@ -40,7 +40,7 @@ Follow these instructions to get a copy of the project up and running on your lo
 
 1.  **Clone the repository:**
     ```sh
-    git clone <your-repository-url>
+    git clone https://github.com/Crimson-Abyss/SystemProject
     cd system-project
     ```
 
