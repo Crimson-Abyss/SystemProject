@@ -1,21 +1,17 @@
 import React from 'react';
-// 1. Import NavLink
-import { NavLink } from 'react-router-dom';
+import { Link, NavLink } from 'react-router-dom';
 import PropTypes from 'prop-types';
-// Use BsQrCode as requested, and clean up other imports
 import { BsQrCode } from "react-icons/bs";
 import { FiHome, FiGrid, FiMapPin, FiGift, FiLogOut } from "react-icons/fi";
+import logo from '../assets/logo.jpg'; // Assuming logo is in src/assets
 import { useUser } from './UserContext';
 
-// 3. Update NavItem to use NavLink
 const NavItem = ({ icon, text, to, end }) => {
   return (
     <li>
       <NavLink
         to={to}
-        // The `end` prop ensures this link is only active on an exact match
         end={end}
-        // This 'className' function gets { isActive } from NavLink
         className={({ isActive }) =>
           [
             'flex items-center px-4 py-2 rounded-full cursor-pointer transition-colors',
@@ -48,8 +44,10 @@ const Sidebar = () => {
         <div className="flex h-16 items-center justify-between">
           {/* Logo / Brand */}
           <div className="flex items-center gap-3">
-            <div className="h-8 w-8 rounded-md bg-black/10 ring-1 ring-black/10 dark:bg-white/10 dark:ring-white/15"></div>
-            <span className="text-neutral-900 dark:text-white text-xl font-semibold">InsteaG</span>
+            <Link to="/app" className="flex items-center gap-3">
+              <img src={logo} alt="InsteaG Logo" className="h-10 w-auto" />
+              <span className="text-neutral-900 dark:text-white text-2xl font-semibold">InsteaG</span>
+            </Link>
           </div>
 
           {/* Navigation */}

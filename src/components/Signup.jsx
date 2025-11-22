@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import logo from '../assets/logo.jpg';
+import { FiEye, FiEyeOff } from 'react-icons/fi';
 
 const Signup = () => {
   const navigate = useNavigate();
@@ -12,6 +14,7 @@ const Signup = () => {
   const [confirm, setConfirm] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [showPassword, setShowPassword] = useState(false);
 
   const onSubmit = async (e) => {
     e.preventDefault();
@@ -55,93 +58,78 @@ const Signup = () => {
   return (
     <main className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <div className="max-w-md mx-auto px-6 py-16">
-        <Link to="/" className="text-xl font-bold text-emerald-700 dark:text-emerald-500">System</Link>
-        <h1 className="mt-6 text-3xl font-bold text-gray-900 dark:text-white">Create your account</h1>
-        <p className="mt-2 text-gray-600 dark:text-gray-300">Join and start earning rewards today.</p>
+        <Link to="/" className="flex items-center justify-center mb-6">
+          <img src={logo} alt="InsteaG Logo" className="h-10 w-auto dark:mix-blend-screen" />
+        </Link>
+        <div className="text-center">
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Join InsteaG Rewards</h1>
+          <p className="mt-2 text-gray-600 dark:text-gray-300">Sign up today and get your first coffee free.</p>
+        </div>
+
+        <div className="mt-8">
+          <button className="w-full inline-flex items-center justify-center px-4 py-2 rounded-md bg-white dark:bg-slate-800 border border-gray-300 dark:border-slate-700 text-gray-700 dark:text-white font-medium hover:bg-gray-50 dark:hover:bg-slate-700">
+            {/* Google Icon Placeholder */}
+            <svg className="w-5 h-5 mr-2" viewBox="0 0 48 48"><path fill="#FFC107" d="M43.611,20.083H42V20H24v8h11.303c-1.649,4.657-6.08,8-11.303,8c-6.627,0-12-5.373-12-12c0-6.627,5.373-12,12-12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C12.955,4,4,12.955,4,24s8.955,20,20,20s20-8.955,20-20C44,22.659,43.862,21.35,43.611,20.083z"></path><path fill="#FF3D00" d="M6.306,14.691l6.571,4.819C14.655,15.108,18.961,12,24,12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C16.318,4,9.656,8.337,6.306,14.691z"></path><path fill="#4CAF50" d="M24,44c5.166,0,9.86-1.977,13.409-5.192l-6.19-5.238C29.211,35.091,26.715,36,24,36c-5.202,0-9.619-3.317-11.283-7.946l-6.522,5.025C9.505,39.556,16.227,44,24,44z"></path><path fill="#1976D2" d="M43.611,20.083H42V20H24v8h11.303c-0.792,2.237-2.231,4.166-4.087,5.571l6.19,5.238C42.021,35.596,44,30.138,44,24C44,22.659,43.862,21.35,43.611,20.083z"></path></svg>
+            Sign up with Google
+          </button>
+          <div className="my-6 flex items-center text-sm">
+            <div className="flex-grow border-t border-gray-300 dark:border-gray-700"></div>
+            <span className="mx-4 text-gray-500">OR</span>
+            <div className="flex-grow border-t border-gray-300 dark:border-gray-700"></div>
+          </div>
+        </div>
 
         <form onSubmit={onSubmit} className="mt-8 bg-white dark:bg-gray-800/50 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-gray-800">
           {error && (
             <div className="mb-4 rounded-md bg-rose-50 dark:bg-rose-500/10 border border-rose-200 dark:border-rose-500/20 text-rose-800 dark:text-rose-300 px-3 py-2 text-sm">{error}</div>
           )}
 
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Full name</label>
-          <input
-            type="text"
-            required
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            className="mt-1 w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-white focus:border-emerald-500 focus:ring-emerald-500"
-            placeholder="Sophia Johnson"
-          />
+          <div className="grid grid-cols-1 gap-y-4 gap-x-6">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Full name</label>
+              <input type="text" required value={name} onChange={(e) => setName(e.target.value)} className="mt-1 w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-white focus:border-emerald-500 focus:ring-emerald-500" placeholder="Sophia Johnson" />
+            </div>
 
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mt-4">Email</label>
-          <input
-            type="email"
-            required
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="mt-1 w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-white focus:border-emerald-500 focus:ring-emerald-500"
-            placeholder="you@example.com"
-          />
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Email</label>
+              <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} className="mt-1 w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-white focus:border-emerald-500 focus:ring-emerald-500" placeholder="you@example.com" />
+            </div>
 
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mt-4">Phone Number</label>
-          <input
-            type="tel"
-            value={phone}
-            onChange={(e) => setPhone(e.target.value)}
-            className="mt-1 w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-white focus:border-emerald-500 focus:ring-emerald-500"
-            placeholder="+1 555 123 4567"
-          />
+            <div className="grid grid-cols-2 gap-x-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Date of Birth</label>
+                <input type="date" value={dob} onChange={(e) => setDob(e.target.value)} className="mt-1 w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-white focus:border-emerald-500 focus:ring-emerald-500" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Gender</label>
+                <select value={gender} onChange={(e) => setGender(e.target.value)} className="mt-1 w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-white focus:border-emerald-500 focus:ring-emerald-500">
+                  <option value="">Select...</option>
+                  <option>Female</option>
+                  <option>Male</option>
+                  <option>Non-binary</option>
+                  <option>Prefer not to say</option>
+                </select>
+              </div>
+            </div>
 
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mt-4">Date of Birth</label>
-          <input
-            type="date"
-            value={dob}
-            onChange={(e) => setDob(e.target.value)}
-            className="mt-1 w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-white focus:border-emerald-500 focus:ring-emerald-500"
-          />
+            <div className="relative">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Password</label>
+              <input type={showPassword ? 'text' : 'password'} required value={password} onChange={(e) => setPassword(e.target.value)} className="mt-1 w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-white focus:border-emerald-500 focus:ring-emerald-500" placeholder="••••••••" />
+              <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute inset-y-0 right-0 top-6 pr-3 flex items-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-200">
+                {showPassword ? <FiEyeOff /> : <FiEye />}
+              </button>
+            </div>
 
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mt-4">Gender</label>
-          <select
-            value={gender}
-            onChange={(e) => setGender(e.target.value)}
-            className="mt-1 w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-white focus:border-emerald-500 focus:ring-emerald-500"
-          >
-            <option value="">Select gender</option>
-            <option>Female</option>
-            <option>Male</option>
-            <option>Non-binary</option>
-            <option>Prefer not to say</option>
-          </select>
-
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mt-4">Password</label>
-          <input
-            type="password"
-            required
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="mt-1 w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-white focus:border-emerald-500 focus:ring-emerald-500"
-            placeholder="••••••••"
-          />
-
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mt-4">Confirm password</label>
-          <input
-            type="password"
-            required
-            value={confirm}
-            onChange={(e) => setConfirm(e.target.value)}
-            className="mt-1 w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-white focus:border-emerald-500 focus:ring-emerald-500"
-            placeholder="••••••••"
-          />
-
-          <button
-            type="submit"
-            disabled={loading}
-            className="mt-6 w-full inline-flex items-center justify-center px-4 py-2 rounded-md bg-emerald-600 text-white font-medium hover:bg-emerald-700 disabled:opacity-60"
-          >
-            {loading ? 'Creating account...' : 'Create account'}
-          </button>
+            <div className="relative">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Confirm password</label>
+              <input type={showPassword ? 'text' : 'password'} required value={confirm} onChange={(e) => setConfirm(e.target.value)} className="mt-1 w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-white focus:border-emerald-500 focus:ring-emerald-500" placeholder="••••••••" />
+            </div>
+          </div>
           
+          <button type="submit" disabled={loading} className="mt-6 w-full inline-flex items-center justify-center px-4 py-2 rounded-md bg-emerald-600 text-white font-medium hover:bg-emerald-700 disabled:opacity-60">
+            {loading ? 'Creating account...' : 'Create Account'}
+          </button>
+
           <div className="mt-4 text-sm text-gray-600 dark:text-gray-400">
             Already have an account?{' '}
             <Link to="/login" className="text-emerald-700 dark:text-emerald-500 hover:underline">Log in</Link>

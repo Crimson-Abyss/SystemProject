@@ -18,8 +18,10 @@ import Settings from './components/Settings.jsx';
 import Products from './components/Products.jsx';
 import Rewards from './components/Rewards.jsx';
 import Locations from './components/Locations.jsx';
+import Cart from './components/Cart.jsx';
 
-import { UserProvider } from './components/UserContext';
+import { UserProvider } from './components/UserContext.jsx';
+import { CartProvider } from './components/CartContext.jsx';
 
 // Routes
 const router = createBrowserRouter([
@@ -40,6 +42,7 @@ const router = createBrowserRouter([
       { path: "products", element: <Products /> },
       { path: "rewards", element: <Rewards /> },
       { path: "locations", element: <Locations /> },
+      { path: "cart", element: <Cart /> },
     ],
   },
 ]);
@@ -47,7 +50,9 @@ const router = createBrowserRouter([
 function App() {
   return (
     <UserProvider>
-      <RouterProvider router={router} />
+      <CartProvider>
+        <RouterProvider router={router} />
+      </CartProvider>
     </UserProvider>
   );
 }

@@ -1,17 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { FiCoffee, FiGift, FiShoppingBag } from 'react-icons/fi';
-import { Link } from 'react-router-dom';
+import { FiCoffee, FiGift, FiShoppingBag, FiStar } from 'react-icons/fi';
+import { Link, NavLink } from 'react-router-dom';
 import PropTypes from 'prop-types';
+import { useCart } from './CartContext.jsx';
 
 // Sub-component for Offer Cards
 const OfferCard = ({ title, description, imageUrl }) => (
-  <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm overflow-hidden">
-    <div className="w-full h-32 bg-gray-200 dark:bg-gray-700">
-      {/* Replace div with <img src={imageUrl} alt={title} className="w-full h-32 object-cover" /> */}
-    </div>
-    <div className="p-4">
-      <h3 className="font-semibold text-lg text-gray-800 dark:text-white">{title}</h3>
-      <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">{description}</p>
+  <div className="bg-gradient-to-r from-emerald-600 to-teal-600 text-white rounded-lg shadow-md overflow-hidden p-6 h-full flex flex-col justify-between transition-transform duration-200 hover:-translate-y-1">
+    <div>
+      <h3 className="font-bold text-xl">{title}</h3>
+      <p className="text-sm text-emerald-100 mt-1">{description}</p>
     </div>
   </div>
 );
@@ -37,7 +35,7 @@ const HistoryItem = ({ icon, description, points }) => (
 
 HistoryItem.propTypes = {
   icon: PropTypes.element.isRequired,
-  title: PropTypes.string.isRequired,
+  description: PropTypes.string.isRequired,
   points: PropTypes.number.isRequired,
 };
 
@@ -46,7 +44,7 @@ const RedeemCard = ({ title, cost, description, userPoints }) => {
   const canRedeem = userPoints >= cost;
 
   return (
-  <div className={`bg-white dark:bg-gray-800 rounded-lg shadow-sm p-4 border border-gray-100 dark:border-gray-700 transition-transform duration-200 ${canRedeem ? 'hover:scale-105 hover:shadow-lg' : 'opacity-60'}`}>
+  <div className={`bg-white dark:bg-gray-800 rounded-lg shadow-sm p-4 border border-gray-100 dark:border-gray-700 transition-transform duration-200 ${canRedeem ? 'hover:-translate-y-1 hover:shadow-lg' : 'opacity-60'}`}>
     <div className="flex items-start gap-3">
       <div className="p-2 rounded-full bg-emerald-50 dark:bg-emerald-900/50 text-emerald-700 dark:text-emerald-400">
         <FiGift />
@@ -78,30 +76,53 @@ RedeemCard.propTypes = {
 };
 
 // Product Card
-const ProductCard = ({ name, price, imageUrl }) => (
-  <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm overflow-hidden border border-gray-100 dark:border-gray-700 transition-transform duration-200 hover:scale-105 hover:shadow-lg">
-    <div className="w-full h-32 bg-gray-200 dark:bg-gray-700">
-      {/* <img src={imageUrl} alt={name} className="w-full h-32 object-cover" /> */}
-    </div>
-    <div className="p-4">
-      <div className="flex items-center justify-between">
-        <h3 className="font-semibold text-gray-800 dark:text-white">{name}</h3>
-        <span className="text-sm text-gray-700 dark:text-gray-300">{price}</span>
+const ProductCard = ({ product }) => {
+  const { addToCart } = useCart();
+  const { name, description, price, imageUrl, badge, rating } = product;
+
+  return (
+    <div className="bg-white dark:bg-slate-800 rounded-lg shadow-md overflow-hidden border border-gray-200 dark:border-white/10 transition-transform duration-200 hover:scale-105 hover:-translate-y-1 hover:shadow-xl flex flex-col">
+      <div className="relative w-full h-40 bg-gray-200 dark:bg-slate-700">
+        {badge && (
+          <div className="absolute top-2 left-2 bg-emerald-600 text-white text-xs font-bold px-2 py-1 rounded-full">
+            {badge}
+          </div>
+        )}
+        {/* <img src={imageUrl} alt={name} className="w-full h-full object-cover" /> */}
       </div>
-      <button
-        type="button"
-        className="mt-3 inline-flex items-center px-3 py-1.5 rounded-md border border-gray-300 dark:border-gray-600 text-gray-800 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 text-sm"
-      >
-        <FiShoppingBag className="mr-2" /> Explore
-      </button>
+      <div className="p-4 flex-1 flex flex-col">
+        <div className="flex items-center justify-between">
+          <h3 className="font-bold text-lg text-gray-800 dark:text-white truncate">{name}</h3>
+          <div className="flex items-center gap-1 text-amber-500">
+            <FiStar className="w-4 h-4" />
+            <span className="text-sm font-medium text-gray-600 dark:text-gray-300">{rating}</span>
+          </div>
+        </div>
+        <p className="text-sm text-gray-500 dark:text-gray-400 mt-1 flex-1">{description}</p>
+        <div className="mt-4 flex items-center justify-between">
+          <span className="text-xl font-bold text-emerald-600 dark:text-emerald-400">{price}</span>
+          <button
+            type="button"
+            onClick={(e) => { e.preventDefault(); addToCart(product); }}
+            className="inline-flex items-center justify-center px-4 py-2 rounded-md bg-emerald-600 text-white text-sm font-medium hover:bg-emerald-700"
+          >
+            <FiShoppingBag className="mr-2 h-4 w-4" /> Add
+          </button>
+        </div>
+      </div>
     </div>
-  </div>
-);
+  );
+};
 
 ProductCard.propTypes = {
-  name: PropTypes.string.isRequired,
-  price: PropTypes.string.isRequired,
-  imageUrl: PropTypes.string.isRequired,
+  product: PropTypes.shape({
+    name: PropTypes.string.isRequired,
+    description: PropTypes.string.isRequired,
+    price: PropTypes.string.isRequired,
+    imageUrl: PropTypes.string,
+    badge: PropTypes.string,
+    rating: PropTypes.number,
+  }).isRequired,
 };
 
 import { useUser } from './UserContext';
@@ -111,6 +132,15 @@ const HomeScreen = () => {
 
   const [featuredRewards, setFeaturedRewards] = useState([]);
   const [history, setHistory] = useState([]);
+  const products = [
+    { id: 1, name: 'House Blend Coffee', description: 'Our signature rich & smooth drip coffee.', price: '₱175.00', rating: 4.5, badge: 'Bestseller' },
+    { id: 2, name: 'Matcha Latte', description: 'Ceremonial grade matcha with steamed milk.', price: '₱210.00', rating: 4.8 },
+    { id: 3, name: 'Blueberry Muffin', description: 'Freshly baked with wild blueberries.', price: '₱140.00', rating: 4.2, badge: 'New' },
+  ];
+
+  // Mock next reward for progress bar
+  const nextRewardCost = 100;
+  const progress = (user.points / nextRewardCost) * 100;
 
   useEffect(() => {
     const fetchRewards = async () => {
@@ -149,62 +179,54 @@ const HomeScreen = () => {
   }, []);
 
   return (
-    <main className="flex-1 p-10 overflow-y-auto">
-        {/* Welcome Header */}
-      <div className="flex items-center gap-4 mb-10">
-        <div className="flex-shrink-0 w-16 h-16 rounded-full bg-emerald-100 dark:bg-emerald-900/50 flex items-center justify-center ring-4 ring-white dark:ring-gray-900">
-          <span className="text-2xl font-bold text-emerald-700 dark:text-emerald-400">{user.initial}</span>
+    <main className="flex-1 p-10 overflow-y-auto bg-gray-50 dark:bg-slate-900">
+      {/* Dashboard Header */}
+      <div className="flex flex-col md:flex-row items-start justify-between gap-6 mb-10">
+        <div className="flex items-center gap-4">
+          <div className="flex-shrink-0 w-16 h-16 rounded-full bg-emerald-100 dark:bg-emerald-900/50 flex items-center justify-center ring-4 ring-white dark:ring-gray-900">
+            <span className="text-2xl font-bold text-emerald-700 dark:text-emerald-400">{user.initial}</span>
+          </div>
+          <div>
+              <h1 className="text-3xl font-bold text-gray-800 dark:text-white">Welcome back, {user.name}!</h1>
+              <p className="text-gray-600 dark:text-gray-300">Here's what's new for you today.</p>
+          </div>
         </div>
-        <div>
-            <h1 className="text-3xl font-bold text-gray-800 dark:text-white">Welcome back, {user.name}!</h1>
-            <p className="text-gray-600 dark:text-gray-300">
-              You have <span className="font-bold text-emerald-600 dark:text-emerald-400">{user.points} points</span>. Explore your offers and rewards.
-            </p>
+        <div className="w-full md:w-auto md:min-w-[280px] bg-white dark:bg-slate-800 p-4 rounded-lg shadow-sm border border-gray-200 dark:border-slate-700">
+          <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Your Points</p>
+          <p className="text-3xl font-bold text-emerald-600 dark:text-emerald-400">{user.points}</p>
+          <div className="w-full bg-gray-200 dark:bg-slate-700 rounded-full h-1.5 mt-2">
+            <div className="bg-emerald-500 h-1.5 rounded-full" style={{ width: `${progress}%` }}></div>
+          </div>
+          <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">{nextRewardCost - user.points} points to next reward</p>
         </div>
       </div>
-    
-        {/* Featured Offers */}
-        <div className="mb-10">
-          <h2 className="text-2xl font-semibold text-gray-800 dark:text-white mb-4">Featured Offers</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <OfferCard
-              title="New Member Perks"
-              description="Enjoy a free drink on us for signing up."
-              imageUrl=""
-            />
-            <OfferCard
-              title="Exclusive 15% Off Your Next Visit"
-              description="Valid this weekend only. Show this offer in-store."
-              imageUrl=""
-            />
-            <OfferCard
-              title="Refer a Friend, Get 50 Points"
-              description="Share your referral code and earn rewards."
-              imageUrl=""
-            />
-          </div>
-        </div>
 
-        {/* Recent History */}
-        <div>
+      {/* Featured Offers */}
+      <div className="mb-10">
+        <h2 className="text-2xl font-semibold text-gray-800 dark:text-white mb-4">Featured Offers</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <OfferCard title="New Member Perks" description="Enjoy a free drink on us for signing up." imageUrl="" />
+          <OfferCard title="Exclusive 15% Off" description="Valid this weekend only. Show this offer in-store." imageUrl="" />
+          <OfferCard title="Refer a Friend" description="Share your code and get 50 points." imageUrl="" />
+        </div>
+      </div>
+
+      {/* Recent History (Conditional) */}
+      {history.length > 0 && (
+        <div className="mb-10">
           <h2 className="text-2xl font-semibold text-gray-800 dark:text-white mb-4">Recent History</h2>
           <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm">
-            {history.length > 0 ? (
-              history.map((item) => (
-                <HistoryItem
-                  key={item.id}
-                  icon={<FiGift />}
-                  description={item.description}
-                  points={item.pointsChange}
-                />
-              ))
-            ) : (
-              <div className="py-3 text-center text-gray-500 dark:text-gray-400">
-                No recent activity.
-              </div>
-            )}
+            {history.map((item) => (
+              <HistoryItem
+                key={item.id}
+                icon={<FiGift />}
+                description={item.description}
+                points={item.pointsChange}
+              />
+            ))}
           </div>
         </div>
+      )}
 
         {/* Redeem Rewards */}
         <div className="mt-10">
@@ -212,31 +234,38 @@ const HomeScreen = () => {
             <h2 className="text-2xl font-semibold text-gray-800 dark:text-white">Redeem Rewards</h2>
             <a href="/app/rewards" className="text-sm text-emerald-700 dark:text-emerald-400 hover:underline">View all</a>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="flex gap-6 pb-4 -mx-10 px-10 overflow-x-auto">
             {featuredRewards.map((reward) => (
-              <Link to="/app/rewards" key={reward.id}>
+              <div key={reward.id} className="flex-shrink-0 w-full md:w-1/3 lg:w-1/4">
                 <RedeemCard title={reward.title} cost={reward.cost} description={reward.description} userPoints={user.points} />
-              </Link>
+              </div>
             ))}
           </div>
         </div>
 
         {/* Products to Explore */}
         <div className="mt-10">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-2xl font-semibold text-gray-800 dark:text-white">Products to Explore</h2>
-            <a href="/app/products" className="text-sm text-emerald-700 dark:text-emerald-400 hover:underline">View all</a>
+          <div className="mb-6">
+            <h2 className="text-2xl font-semibold text-gray-800 dark:text-white mb-2">Products to Explore</h2>
+            <div className="relative w-full md:max-w-xs">
+              <input type="search" placeholder="Search products..." className="w-full pl-4 pr-10 py-2 rounded-lg bg-white dark:bg-slate-800 border border-gray-300 dark:border-slate-700 focus:ring-emerald-500 focus:border-emerald-500" />
+            </div>
           </div>
+
+          {/* Category Pills */}
+          <div className="flex items-center gap-2 mb-6 border-b border-gray-200 dark:border-slate-700">
+            <NavLink to="#" className={({isActive}) => `px-4 py-2 font-medium text-sm rounded-t-lg ${isActive ? 'bg-emerald-600 text-white' : 'text-gray-500 hover:bg-gray-200 dark:hover:bg-slate-800'}`}>All</NavLink>
+            <NavLink to="#" className={({isActive}) => `px-4 py-2 font-medium text-sm rounded-t-lg ${isActive ? 'bg-emerald-600 text-white' : 'text-gray-500 hover:bg-gray-200 dark:hover:bg-slate-800'}`}>Coffee</NavLink>
+            <NavLink to="#" className={({isActive}) => `px-4 py-2 font-medium text-sm rounded-t-lg ${isActive ? 'bg-emerald-600 text-white' : 'text-gray-500 hover:bg-gray-200 dark:hover:bg-slate-800'}`}>Tea</NavLink>
+            <NavLink to="#" className={({isActive}) => `px-4 py-2 font-medium text-sm rounded-t-lg ${isActive ? 'bg-emerald-600 text-white' : 'text-gray-500 hover:bg-gray-200 dark:hover:bg-slate-800'}`}>Pastries</NavLink>
+          </div>
+
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <Link to="/app/products">
-              <ProductCard name="House Blend Coffee" price="$3.50" imageUrl="" />
-            </Link>
-            <Link to="/app/products">
-              <ProductCard name="Matcha Latte" price="$4.20" imageUrl="" />
-            </Link>
-            <Link to="/app/products">
-              <ProductCard name="Blueberry Muffin" price="$2.80" imageUrl="" />
-            </Link>
+            {products.map(p => (
+              <Link to="/app/products" key={p.id}>
+                <ProductCard product={p} />
+              </Link>
+            ))}
           </div>
         </div>
     </main>

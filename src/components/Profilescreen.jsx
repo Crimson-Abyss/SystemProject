@@ -1,6 +1,7 @@
 import React, { useMemo, useState, useRef, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { useUser } from './UserContext';
+import { FiFileText, FiEdit3 } from 'react-icons/fi';
 
 // Sub-component for Form Inputs
 const FormInput = ({ label, id, className = '', ...props }) => (
@@ -10,7 +11,7 @@ const FormInput = ({ label, id, className = '', ...props }) => (
     </label>
     <input
       id={id}
-      className="block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900/50 dark:text-white shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+      className="block w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white shadow-sm focus:border-emerald-500 focus:ring-emerald-500 sm:text-sm disabled:bg-gray-100 disabled:dark:bg-gray-800/50"
       {...props}
     />
   </div>
@@ -41,6 +42,7 @@ const ProfileScreen = () => {
   const { user, setUser } = useUser();
   const fileInputRef = useRef(null);
   const [history, setHistory] = useState([]);
+  const [isEditing, setIsEditing] = useState(false);
 
   const profile = useMemo(() => {
     try {
@@ -102,10 +104,13 @@ const ProfileScreen = () => {
 
   const fullName = profile?.fullName || '';
   const email = profile?.email || '';
-  const phone = profile?.phone || '';
   const dob = profile?.dob || '';
   const gender = profile?.gender || '';
   const tier = profile?.membershipTier || 'Member';
+  const points = profile?.points || 0;
+
+  const nextTierCost = 1000; // Example: Platinum tier at 1000 points
+  const progress = (points / nextTierCost) * 100;
 
   return (
     <main className="flex-1 p-10 overflow-y-auto">
@@ -128,25 +133,49 @@ const ProfileScreen = () => {
           </div>
           <div>
             <h2 className="text-2xl font-semibold dark:text-white">{fullName || 'Your Name'}</h2>
-            <div className="flex items-center gap-4 text-gray-600 dark:text-gray-400">
-              <span>{tier}</span>
-              <span className="font-bold text-emerald-600 dark:text-emerald-400">{profile?.points || 0} Points</span>
+            <div className="flex items-center gap-4 mt-1">
+              <span className="bg-emerald-500/20 text-emerald-400 border border-emerald-500/50 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider">{tier}</span>
+              <span className="font-bold text-emerald-600 dark:text-emerald-400">{points} Points</span>
             </div>
+            <div className="w-full max-w-xs bg-gray-200 dark:bg-slate-700 rounded-full h-1.5 mt-3">
+              <div className="bg-emerald-500 h-1.5 rounded-full" style={{ width: `${progress}%` }}></div>
+            </div>
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">{nextTierCost - points} points to Platinum</p>
           </div>
         </div>
 
         {/* Personal Information */}
         <div className="bg-white dark:bg-gray-800/50 p-8 rounded-lg shadow-sm border border-gray-200 dark:border-gray-800 mb-10">
-          <h3 className="text-xl font-semibold text-gray-800 dark:text-white mb-6">Personal Information</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <FormInput label="Name" id="name" value={fullName} readOnly />
-            <FormInput label="Email" id="email" type="email" value={email} readOnly />
-            <FormInput label="Phone Number" id="phone" type="tel" value={phone} readOnly />
-            <FormInput label="Date of Birth" id="dob" type="text" value={dob} readOnly />
-            <FormInput label="Gender" id="gender" type="text" value={gender} readOnly className="md:col-span-2" />
+          <div className="flex items-center justify-between mb-6">
+            <h3 className="text-xl font-semibold text-gray-800 dark:text-white">Personal Information</h3>
+            {!isEditing && (
+              <button onClick={() => setIsEditing(true)} className="flex items-center gap-2 text-sm font-medium text-emerald-600 hover:text-emerald-500">
+                <FiEdit3 /> Edit Profile
+              </button>
+            )}
           </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <FormInput label="Name" id="name" value={fullName} disabled={!isEditing} />
+            <FormInput label="Email" id="email" type="email" value={email} disabled={!isEditing} />
+            <FormInput label="Date of Birth" id="dob" type="text" value={dob} disabled={!isEditing} />
+            <FormInput label="Gender" id="gender" type="text" value={gender} disabled={!isEditing} />
+          </div>
+          {isEditing && (
+            <div className="flex justify-end gap-3 mt-6">
+              <button onClick={() => setIsEditing(false)} className="px-4 py-2 rounded-md text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">Cancel</button>
+              <button onClick={() => setIsEditing(false)} className="px-4 py-2 rounded-md text-sm font-medium bg-emerald-600 text-white hover:bg-emerald-700">Save Changes</button>
+            </div>
+          )}
         </div>
         {hiddenFileInput}
+
+        {/* Security Section */}
+        <div className="bg-white dark:bg-gray-800/50 p-8 rounded-lg shadow-sm border border-gray-200 dark:border-gray-800 mb-10">
+          <h3 className="text-xl font-semibold text-gray-800 dark:text-white mb-6">Security</h3>
+          <button className="px-4 py-2 rounded-md text-sm font-medium border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700">
+            Change Password
+          </button>
+        </div>
 
         {/* Rewards History */}
         <div className="bg-white dark:bg-gray-800/50 p-8 rounded-lg shadow-sm border border-gray-200 dark:border-gray-800">
@@ -172,7 +201,11 @@ const ProfileScreen = () => {
               ) : (
                 <tr>
                   <td colSpan="3" className="py-8 text-center text-gray-500 dark:text-gray-400">
-                    No rewards history yet.
+                    <div className="flex flex-col items-center gap-2">
+                      <FiFileText className="w-10 h-10 text-gray-400" />
+                      <span className="font-medium">No rewards history yet.</span>
+                      <p className="text-sm">Start ordering to earn points!</p>
+                    </div>
                   </td>
                 </tr>
               )}
