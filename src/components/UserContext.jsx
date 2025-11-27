@@ -15,7 +15,7 @@ export const UserProvider = ({ children }) => {
         const points = parsedProfile.points || 0;
         const avatarUrl = parsedProfile.avatarUrl || null;
         // The name is stored as 'fullName' in the profile object
-        return { name, initial, avatarUrl, points };
+        return { ...parsedProfile, name, initial, avatarUrl, points };
       }
     } catch (error) {
       console.error("Failed to parse user profile from localStorage", error);

@@ -37,6 +37,8 @@ const Login = () => {
         setUser({ name, initial, points, avatarUrl });
         // Save profile to localStorage so it persists on refresh
         localStorage.setItem('userProfile', JSON.stringify(profile));
+        // Save token to localStorage
+        localStorage.setItem('token', data.token);
 
         navigate('/app');
       } else {
@@ -79,15 +81,15 @@ const Login = () => {
             )}
             <div className="space-y-4">
               <div className="relative">
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Email</label>
+                <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Email</label>
                 <FiMail className="pointer-events-none absolute left-3 top-9 h-5 w-5 text-gray-400" />
-                <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} className="w-full pl-10 pr-3 py-2 rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-white focus:border-emerald-500 focus:ring-emerald-500" placeholder="you@example.com" />
+                <input id="email" type="email" required value={email} onChange={(e) => setEmail(e.target.value)} className="w-full pl-10 pr-3 py-2 rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-white focus:border-emerald-500 focus:ring-emerald-500" placeholder="you@example.com" />
               </div>
 
               <div className="relative">
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Password</label>
+                <label htmlFor="password" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Password</label>
                 <FiLock className="pointer-events-none absolute left-3 top-9 h-5 w-5 text-gray-400" />
-                <input type={showPassword ? 'text' : 'password'} required value={password} onChange={(e) => setPassword(e.target.value)} className="w-full pl-10 pr-10 py-2 rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-white focus:border-emerald-500 focus:ring-emerald-500" placeholder="••••••••" />
+                <input id="password" type={showPassword ? 'text' : 'password'} required value={password} onChange={(e) => setPassword(e.target.value)} className="w-full pl-10 pr-10 py-2 rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-white focus:border-emerald-500 focus:ring-emerald-500" placeholder="••••••••" />
                 <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute top-7 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 h-10">
                   {showPassword ? <FiEyeOff /> : <FiEye />}
                 </button>
