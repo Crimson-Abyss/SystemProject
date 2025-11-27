@@ -1,4 +1,5 @@
 const sqlite3 = require('sqlite3').verbose();
+const crypto = require('crypto');
 
 // Use ':memory:' for an in-memory database, or a file path for a persistent one.
 const db = new sqlite3.Database('./database.db', (err) => {
@@ -6,9 +7,11 @@ const db = new sqlite3.Database('./database.db', (err) => {
     console.error('Error opening database', err.message);
   } else {
     console.log('Connected to the SQLite database.');
+
     // Create the users table if it doesn't exist
     db.run(`CREATE TABLE IF NOT EXISTS users (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
+      uid TEXT UNIQUE,
       fullName TEXT NOT NULL,
       email TEXT NOT NULL UNIQUE,
       phone TEXT,
@@ -22,8 +25,49 @@ const db = new sqlite3.Database('./database.db', (err) => {
     )`, (err) => {
       if (err) {
         console.error("Error creating table", err.message);
+      } else {
+        // Migration: Check if 'uid' column exists (for existing databases)
+        db.all("PRAGMA table_info(users)", (err, columns) => {
+          if (err) {
+            console.error("Error checking table info", err.message);
+            return;
+          }
+          const hasUid = columns.some(col => col.name === 'uid');
+          if (!hasUid) {
+            console.log("Adding 'uid' column to users table...");
+            db.run("ALTER TABLE users ADD COLUMN uid TEXT", (err) => {
+              if (err) {
+                console.error("Error adding uid column", err.message);
+              } else {
+                console.log("'uid' column added.");
+                // Backfill UIDs for existing users
+                backfillUids();
+              }
+            });
+          } else {
+            // Also check for null UIDs even if column exists
+            backfillUids();
+          }
+        });
       }
     });
+
+    // Function to backfill UIDs
+    function backfillUids() {
+      db.all("SELECT id FROM users WHERE uid IS NULL", (err, rows) => {
+        if (err) return console.error("Error finding users without UID", err.message);
+
+        if (rows.length > 0) {
+          console.log(`Found ${rows.length} users without UID. Backfilling...`);
+          const stmt = db.prepare("UPDATE users SET uid = ? WHERE id = ?");
+          rows.forEach(row => {
+            const uid = crypto.randomUUID();
+            stmt.run(uid, row.id);
+          });
+          stmt.finalize(() => console.log("Backfill complete."));
+        }
+      });
+    }
 
     // Create the transactions table to log points history
     db.run(`CREATE TABLE IF NOT EXISTS transactions (

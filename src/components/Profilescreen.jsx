@@ -107,6 +107,7 @@ const ProfileScreen = () => {
     <input type="file" ref={fileInputRef} onChange={handleFileChange} style={{ display: 'none' }} accept="image/*" />
   );
 
+  const uid = profile?.uid || '';
   const fullName = profile?.fullName || '';
   const email = profile?.email || '';
   const dob = profile?.dob || '';
@@ -160,6 +161,9 @@ const ProfileScreen = () => {
             )}
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="md:col-span-2">
+                <FormInput label="User ID" id="uid" value={uid} disabled={true} className="font-mono text-sm" />
+            </div>
             <FormInput label="Name" id="name" value={fullName} disabled={!isEditing} />
             <FormInput label="Email" id="email" type="email" value={email} disabled={!isEditing} />
             <FormInput label="Date of Birth" id="dob" type="text" value={dob} disabled={!isEditing} />
