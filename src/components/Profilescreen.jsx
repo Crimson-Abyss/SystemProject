@@ -58,7 +58,12 @@ const ProfileScreen = () => {
     if (profile?.id) {
       const fetchHistory = async () => {
         try {
-          const response = await fetch(`/api/history/${profile.id}`);
+          const token = localStorage.getItem('token');
+          const response = await fetch(`/api/history/${profile.id}`, {
+            headers: {
+              'Authorization': `Bearer ${token}`
+            }
+          });
           if (response.ok) {
             const data = await response.json();
             setHistory(data);
