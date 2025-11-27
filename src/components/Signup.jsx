@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import logo from '../assets/logo.jpg';
+import { useUser } from './UserContext';
 import { FiEye, FiEyeOff } from 'react-icons/fi';
 
 const Signup = () => {
   const navigate = useNavigate();
+  const { setUser } = useUser();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
@@ -39,10 +41,14 @@ const Signup = () => {
       if (response.ok) {
         // On successful signup, the server returns the new profile.
         // We save it to localStorage to establish the session.
-        const profile = { ...data, fullName: data.fullName, points: 0 }; // Ensure fullName is set and points start at 0
+        const profile = data.user;
         localStorage.setItem('userProfile', JSON.stringify(profile));
-        const initial = profile.fullName ? profile.fullName.charAt(0).toUpperCase() : 'U';
-        // We don't need to call setUser here as the page will navigate and UserContext will re-initialize from localStorage
+        localStorage.setItem('token', data.token);
+
+        const { fullName: name, points, avatarUrl } = profile;
+        const initial = name ? name.charAt(0).toUpperCase() : 'U';
+        setUser({ name, initial, points, avatarUrl });
+
         navigate('/app');
       } else {
         // Display error from the server (e.g., "email already exists")
@@ -86,23 +92,23 @@ const Signup = () => {
 
           <div className="grid grid-cols-1 gap-y-4 gap-x-6">
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Full name</label>
-              <input type="text" required value={name} onChange={(e) => setName(e.target.value)} className="mt-1 w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-white focus:border-emerald-500 focus:ring-emerald-500" placeholder="Sophia Johnson" />
+              <label htmlFor="name" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Full name</label>
+              <input id="name" type="text" required value={name} onChange={(e) => setName(e.target.value)} className="mt-1 w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-white focus:border-emerald-500 focus:ring-emerald-500" placeholder="Sophia Johnson" />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Email</label>
-              <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} className="mt-1 w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-white focus:border-emerald-500 focus:ring-emerald-500" placeholder="you@example.com" />
+              <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Email</label>
+              <input id="email" type="email" required value={email} onChange={(e) => setEmail(e.target.value)} className="mt-1 w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-white focus:border-emerald-500 focus:ring-emerald-500" placeholder="you@example.com" />
             </div>
 
             <div className="grid grid-cols-2 gap-x-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Date of Birth</label>
-                <input type="date" value={dob} onChange={(e) => setDob(e.target.value)} className="mt-1 w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-white focus:border-emerald-500 focus:ring-emerald-500" />
+                <label htmlFor="dob" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Date of Birth</label>
+                <input id="dob" type="date" value={dob} onChange={(e) => setDob(e.target.value)} className="mt-1 w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-white focus:border-emerald-500 focus:ring-emerald-500" />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Gender</label>
-                <select value={gender} onChange={(e) => setGender(e.target.value)} className="mt-1 w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-white focus:border-emerald-500 focus:ring-emerald-500">
+                <label htmlFor="gender" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Gender</label>
+                <select id="gender" value={gender} onChange={(e) => setGender(e.target.value)} className="mt-1 w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-white focus:border-emerald-500 focus:ring-emerald-500">
                   <option value="">Select...</option>
                   <option>Female</option>
                   <option>Male</option>
@@ -113,16 +119,16 @@ const Signup = () => {
             </div>
 
             <div className="relative">
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Password</label>
-              <input type={showPassword ? 'text' : 'password'} required value={password} onChange={(e) => setPassword(e.target.value)} className="mt-1 w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-white focus:border-emerald-500 focus:ring-emerald-500" placeholder="••••••••" />
+              <label htmlFor="password" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Password</label>
+              <input id="password" type={showPassword ? 'text' : 'password'} required value={password} onChange={(e) => setPassword(e.target.value)} className="mt-1 w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-white focus:border-emerald-500 focus:ring-emerald-500" placeholder="••••••••" />
               <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute inset-y-0 right-0 top-6 pr-3 flex items-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-200">
                 {showPassword ? <FiEyeOff /> : <FiEye />}
               </button>
             </div>
 
             <div className="relative">
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Confirm password</label>
-              <input type={showPassword ? 'text' : 'password'} required value={confirm} onChange={(e) => setConfirm(e.target.value)} className="mt-1 w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-white focus:border-emerald-500 focus:ring-emerald-500" placeholder="••••••••" />
+              <label htmlFor="confirm" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Confirm password</label>
+              <input id="confirm" type={showPassword ? 'text' : 'password'} required value={confirm} onChange={(e) => setConfirm(e.target.value)} className="mt-1 w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-white focus:border-emerald-500 focus:ring-emerald-500" placeholder="••••••••" />
             </div>
           </div>
           

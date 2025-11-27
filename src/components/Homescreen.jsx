@@ -165,7 +165,12 @@ const HomeScreen = () => {
 
         if (profile?.id) {
           // Fetch the first 3 history items for the homepage preview
-          const response = await fetch(`/api/history/${profile.id}?limit=3`);
+          const token = localStorage.getItem('token');
+          const response = await fetch(`/api/history/${profile.id}?limit=3`, {
+            headers: {
+              'Authorization': `Bearer ${token}`
+            }
+          });
           if (response.ok) {
             const data = await response.json();
             setHistory(data);
