@@ -1,8 +1,8 @@
 const express = require('express');
 const cors = require('cors');
 const bcrypt = require('bcrypt');
-const jwt = require('jsonwebtoken');
-const crypto = require('crypto');
+const jwt = require('jsonwebtoken'); // Import jsonwebtoken
+const crypto = require('crypto'); // Import crypto for token generation, etc.
 const db = require('./database.js'); // Import the database connection
 
 const app = express();
@@ -40,43 +40,39 @@ app.post('/api/signup', async (req, res) => {
     return res.status(400).json({ message: 'Name, email, and password are required.' });
   }
 
-  const hashedPassword = await bcrypt.hash(password, 10); // Hash the password for security
-  const createdAt = new Date().toISOString();
-  const uid = crypto.randomUUID();
+  try {
+    const hashedPassword = await bcrypt.hash(password, 10); // Hash the password for security
+    const createdAt = new Date().toISOString();
 
-  const sql = `INSERT INTO users (uid, fullName, email, phone, dob, gender, password, createdAt) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`;
-  const params = [uid, name, email, phone, dob, gender, hashedPassword, createdAt];
+    const sql = `INSERT INTO users (fullName, email, phone, dob, gender, password, createdAt) VALUES (?, ?, ?, ?, ?, ?, ?)`;
+    const params = [name, email, phone, dob, gender, hashedPassword, createdAt];
 
-  db.run(sql, params, function (err) {
-    if (err) {
-      // Check for unique constraint violation (email already exists)
-      if (err.code === 'SQLITE_CONSTRAINT') {
-        return res.status(409).json({ message: 'An account with this email already exists.' });
-      }
-      console.error('Database error on signup:', err.message);
-      return res.status(500).json({ message: 'Error creating account.' });
-    }
+    // Wrap db.run in a Promise to use await
+    const result = await new Promise((resolve, reject) => {
+      db.run(sql, params, function (err) {
+        if (err) return reject(err);
+        resolve({ id: this.lastID });
+      });
+    });
 
-    const userProfile = {
-      id: this.lastID,
-      uid: uid,
+    // Return the newly created user profile (excluding the password)
+    res.status(201).json({
+      id: result.id,
       fullName: name,
       email,
       phone,
       dob,
       gender,
       createdAt,
-    };
-
-    // Generate Token
-    const token = jwt.sign({ id: userProfile.id, uid: userProfile.uid, email: userProfile.email }, JWT_SECRET, { expiresIn: '1h' });
-
-    // Return the newly created user profile and token
-    res.status(201).json({
-      user: userProfile,
-      token: token
     });
-  });
+  } catch (err) {
+    // Check for unique constraint violation (email already exists)
+    if (err.code === 'SQLITE_CONSTRAINT') {
+      return res.status(409).json({ message: 'An account with this email already exists.' });
+    }
+    console.error('Database error on signup:', err.message);
+    return res.status(500).json({ message: 'Error creating account.' });
+  }
 });
 
 // Login Endpoint
@@ -97,12 +93,17 @@ app.post('/api/login', (req, res) => {
       return res.status(401).json({ message: 'Invalid credentials' });
     }
 
+    // Create JWT Payload
+    const jwtPayload = {
+      id: user.id,
+      email: user.email,
+      name: user.fullName
+    };
+    // Sign the token
+    const token = jwt.sign(jwtPayload, JWT_SECRET, { expiresIn: '1h' });
+
     // Passwords match. Don't send the password hash back to the client.
     const { password: _, ...userProfile } = user;
-
-    // Generate Token
-    const token = jwt.sign({ id: userProfile.id, uid: userProfile.uid, email: userProfile.email }, JWT_SECRET, { expiresIn: '1h' });
-
     return res.json({ message: 'Login successful', user: userProfile, token });
   });
 });
