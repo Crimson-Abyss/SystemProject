@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 import React, { createContext, useContext, useState } from 'react';
 import PropTypes from 'prop-types';
 
@@ -45,6 +46,10 @@ export const CartProvider = ({ children }) => {
     setCartItems(prevItems => prevItems.filter(item => item.id !== productId));
   };
 
+  const clearCart = () => {
+    setCartItems([]);
+  };
+
   // Calculate the total number of items in the cart
   const cartItemCount = cartItems.reduce((total, item) => total + item.quantity, 0);
 
@@ -53,6 +58,7 @@ export const CartProvider = ({ children }) => {
     addToCart,
     updateQuantity,
     removeFromCart,
+    clearCart,
     cartItemCount,
     notification,
   };

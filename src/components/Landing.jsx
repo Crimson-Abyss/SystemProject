@@ -4,7 +4,7 @@ import logo from '../assets/logo.jpg';
 
 const Landing = () => {
   return (
-    <main className="min-h-screen bg-gradient-to-b from-white to-emerald-50 dark:from-gray-900 dark:to-emerald-900/20">
+    <main className="min-h-screen bg-linear-to-b from-white to-emerald-50 dark:from-gray-900 dark:to-emerald-900/20">
       <header className="max-w-6xl mx-auto flex items-center justify-between px-6 py-5">
         <Link to="/" className="flex items-center gap-3">
           <img src={logo} alt="InsteaG Logo" className="h-10 w-auto dark:mix-blend-screen" />
@@ -19,7 +19,7 @@ const Landing = () => {
       <section className="max-w-6xl mx-auto px-6 py-16 grid lg:grid-cols-2 gap-10 items-center">
         <div>
           <h1 className="text-4xl md:text-5xl font-extrabold text-gray-900 dark:text-white leading-tight">
-            Earn <span className="bg-gradient-to-r from-green-400 via-teal-400 to-emerald-400 bg-clip-text text-transparent">rewards</span> with every visit.
+            Earn <span className="bg-linear-to-r from-green-400 via-teal-400 to-emerald-400 bg-clip-text text-transparent">rewards</span> with every visit.
           </h1>
           <p className="mt-4 text-lg text-gray-600 dark:text-gray-300">
             Join our loyalty program and unlock exclusive offers, points, and perks at your favorite spots.

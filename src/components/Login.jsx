@@ -31,10 +31,18 @@ const Login = () => {
       if (response.ok) {
         // On successful login, update the user context and save to localStorage
         const profile = data.user; // The server sends the full user profile.
-        const { fullName: name, points, avatarUrl } = profile;
+
+        // Prevent admin from logging in here
+        if (profile.role === 'admin') {
+          setError('Admin accounts must use the Admin Portal.');
+          setLoading(false);
+          return;
+        }
+
+        const { fullName: name, points, avatarUrl, role } = profile;
         const initial = name ? name.charAt(0).toUpperCase() : 'U';
         // Update the global user state
-        setUser({ name, initial, points, avatarUrl });
+        setUser({ name, initial, points, avatarUrl, role });
         // Save profile to localStorage so it persists on refresh
         localStorage.setItem('userProfile', JSON.stringify(profile));
         // Save token to localStorage
@@ -69,9 +77,9 @@ const Login = () => {
               Sign in with Google
             </button>
             <div className="my-6 flex items-center text-sm">
-              <div className="flex-grow border-t border-gray-300 dark:border-gray-700"></div>
+              <div className="grow border-t border-gray-300 dark:border-gray-700"></div>
               <span className="mx-4 text-gray-500">OR</span>
-              <div className="flex-grow border-t border-gray-300 dark:border-gray-700"></div>
+              <div className="grow border-t border-gray-300 dark:border-gray-700"></div>
             </div>
           </div>
 
@@ -109,7 +117,7 @@ const Login = () => {
             <button type="submit" disabled={loading} className="mt-6 w-full inline-flex items-center justify-center px-4 py-2 rounded-md bg-emerald-600 text-white font-medium hover:bg-emerald-700 disabled:opacity-60">
               {loading ? 'Signing in...' : 'Sign in'}
             </button>
-            
+
             <div className="mt-6 text-center text-sm text-gray-600 dark:text-gray-400">
               Don't have an account?{' '}
               <Link to="/signup" className="text-emerald-700 dark:text-emerald-500 hover:underline">Sign up</Link>

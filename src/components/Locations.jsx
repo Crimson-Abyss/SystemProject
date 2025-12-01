@@ -23,7 +23,7 @@ const Locations = () => {
           {/* Left Column: Info */}
           <div className="space-y-8">
             <div className="flex items-start gap-4">
-              <FiMapPin className="w-6 h-6 text-emerald-500 mt-1 flex-shrink-0" />
+              <FiMapPin className="w-6 h-6 text-emerald-500 mt-1 shrink-0" />
               <div>
                 <h2 className="text-xl font-semibold">Address</h2>
                 <p className="text-gray-700 dark:text-gray-300">{address}</p>
@@ -35,7 +35,7 @@ const Locations = () => {
             </div>
 
             <div className="flex items-start gap-4">
-              <FiClock className="w-6 h-6 text-emerald-500 mt-1 flex-shrink-0" />
+              <FiClock className="w-6 h-6 text-emerald-500 mt-1 shrink-0" />
               <div>
                 <h2 className="text-xl font-semibold">Opening Hours</h2>
                 <p className="text-gray-700 dark:text-gray-300">Open 24 Hours, 7 Days a Week</p>
@@ -43,7 +43,7 @@ const Locations = () => {
             </div>
 
             <div className="flex items-start gap-4">
-              <FiPhone className="w-6 h-6 text-emerald-500 mt-1 flex-shrink-0" />
+              <FiPhone className="w-6 h-6 text-emerald-500 mt-1 shrink-0" />
               <div>
                 <h2 className="text-xl font-semibold">Contact</h2>
                 <a href="tel:09354190625" className="text-gray-700 dark:text-gray-300 hover:underline">0935 419 0625</a>

@@ -1,18 +1,31 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Scanner } from '@yudiel/react-qr-scanner';
+import { useNavigate } from 'react-router-dom';
 
 const QRScreen = () => {
+  const navigate = useNavigate();
   const [result, setResult] = useState(null);
   const [error, setError] = useState(null);
   const [permission, setPermission] = useState('prompt'); // 'granted' | 'denied' | 'prompt'
   const [facingMode, setFacingMode] = useState('environment'); // 'user' | 'environment'
   const [torch, setTorch] = useState(false);
 
-  const onDecode = useCallback((text) => {
+  const onScan = useCallback((results) => {
+    if (!results || results.length === 0) return;
+    
+    const text = results[0].rawValue;
     setResult(text);
-    // Optionally navigate or process the payload here
-    // e.g., if (text.startsWith('https://')) window.location.href = text
-  }, []);
+    
+    // Check if it's a claim URL
+    if (text && text.includes('/app/claim/')) {
+        // Extract the path if it's a full URL
+        const parts = text.split('/app/claim/');
+        if (parts.length > 1) {
+            const path = parts[1];
+            navigate(`/app/claim/${path}`);
+        }
+    }
+  }, [navigate]);
 
   const onError = useCallback((err) => {
     // Suppress noisy NotFound errors during scanning, show others
@@ -41,14 +54,14 @@ const QRScreen = () => {
     <main className="flex-1 flex flex-col items-center text-center p-6 gap-4">
       <h1 className="text-3xl font-bold text-gray-900">Scan to Earn</h1>
       <p className="max-w-md text-gray-600">
-        Use your device camera to scan the QR code at the register. Or, let the staff scan your profile barcode.
+        Use your device camera to scan the QR code at the your receipt.
       </p>
 
       <div className="w-full max-w-sm">
         <div className="relative w-full aspect-square bg-black rounded-2xl overflow-hidden">
           <Scanner
             constraints={constraints}
-            onDecode={onDecode}
+            onScan={onScan}
             onError={onError}
             containerStyle={{ width: '100%', height: '100%' }}
             videoStyle={{ width: '100%', height: '100%', objectFit: 'cover' }}
@@ -80,7 +93,7 @@ const QRScreen = () => {
             </button>
             <button
               type="button"
-              onClick={() => setTorch((v) => !v)}
+              onClick={() => setTorch ((currentTorchStatus) => !currentTorchStatus)}
               className={`px-3 py-1.5 rounded-md ${torch ? 'bg-amber-500 hover:bg-amber-600' : 'bg-neutral-900 hover:bg-neutral-800'} text-white`}
             >
               {torch ? 'Torch ON' : 'Torch OFF'}
@@ -123,7 +136,7 @@ const QRScreen = () => {
       )}
 
       <p className="text-sm text-gray-500">
-        Having trouble scanning? Your barcode is also available in your Profile.
+        Earn points by scanning the QR Code in your recipt if you ordered in the store
       </p>
     </main>
   );

@@ -1,18 +1,25 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { FiShoppingBag, FiStar } from 'react-icons/fi';
 import { useCart } from './CartContext.jsx';
 
 const Products = () => {
-  const items = [
-    { id: 1, name: 'House Blend Coffee', description: 'Our signature rich & smooth drip coffee.', price: '₱175.00', rating: 4.6, badge: 'Bestseller' },
-    { id: 2, name: 'Matcha Latte', description: 'Ceremonial grade matcha with steamed milk.', price: '₱210.00', rating: 4.8 },
-    { id: 3, name: 'Blueberry Muffin', description: 'Freshly baked with wild blueberries.', price: '₱140.00', rating: 4.4, badge: 'New' },
-    { id: 4, name: 'Iced Caramel Latte', description: 'Espresso, milk, and caramel over ice.', price: '₱235.00', rating: 4.7 },
-    { id: 5, name: 'Vegan Brownie', description: 'A rich, fudgy brownie, completely plant-based.', price: '₱155.00', rating: 4.5 },
-    { id: 6, name: 'Earl Grey Tea', description: 'Classic black tea with bergamot.', price: '₱125.00', rating: 4.3 },
-  ];
-
+  const [items, setItems] = useState([]);
   const { addToCart } = useCart();
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const response = await fetch('/api/products');
+        if (response.ok) {
+          const data = await response.json();
+          setItems(data);
+        }
+      } catch (error) {
+        console.error('Failed to fetch products:', error);
+      }
+    };
+    fetchProducts();
+  }, []);
 
   return (
     <main className="flex-1 p-10 overflow-y-auto bg-gray-50 dark:bg-slate-900">
@@ -54,7 +61,7 @@ const Products = () => {
               </div>
               <p className="text-sm text-gray-500 dark:text-gray-400 mt-1 flex-1">{p.description}</p>
               <div className="mt-4 flex items-center justify-between">
-                <span className="text-xl font-bold text-emerald-600 dark:text-emerald-400">{p.price}</span>
+                <span className="text-xl font-bold text-emerald-600 dark:text-emerald-400">₱{p.price.toFixed(2)}</span>
                 <button
                   onClick={() => addToCart(p)}
                   className="inline-flex items-center justify-center px-4 py-2 rounded-md bg-emerald-600 text-white text-sm font-medium hover:bg-emerald-700"

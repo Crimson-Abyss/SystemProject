@@ -1,14 +1,21 @@
 import React from 'react';
-import { Outlet, Link, useLocation } from 'react-router-dom';
+import { Outlet, Link, useLocation, Navigate } from 'react-router-dom';
 import Sidebar from './Sidebar.jsx';
 import { FiShoppingBag } from 'react-icons/fi';
 import { useCart } from './CartContext.jsx';
+import { useUser } from './UserContext.jsx';
 
 const AppLayout = () => {
   const { cartItemCount, notification } = useCart();
+  const { user } = useUser();
   const location = useLocation();
   const showCartButton = location.pathname !== '/app/cart';
-  
+
+  // Redirect admin to admin dashboard if they try to access the app
+  if (user && user.role === 'admin') {
+    return <Navigate to="/admin" replace />;
+  }
+
   return (
     <div className="min-h-screen bg-gray-100 dark:bg-gray-900">
       <Sidebar />

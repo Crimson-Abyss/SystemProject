@@ -1,7 +1,7 @@
 import React from 'react';
 import { FiPlus, FiMinus, FiTrash2, FiCreditCard, FiCoffee, FiArrowLeft } from 'react-icons/fi';
 import { useCart } from './CartContext.jsx';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 const CartItem = ({ item }) => {
   const { updateQuantity, removeFromCart } = useCart();
@@ -28,7 +28,7 @@ const CartItem = ({ item }) => {
             <FiPlus className="w-4 h-4" />
           </button>
         </div>
-        <span className="font-bold w-20 text-right">{`₱${(parseFloat(item.price.slice(1)) * item.quantity).toFixed(2)}`}</span>
+        <span className="font-bold w-20 text-right">{`₱${((typeof item.price === 'string' ? parseFloat(item.price.slice(1)) : item.price) * item.quantity).toFixed(2)}`}</span>
         <button onClick={() => removeFromCart(item.id)} className="text-gray-500 hover:text-red-500 dark:hover:text-red-400">
           <FiTrash2 className="w-5 h-5" />
         </button>
@@ -38,11 +38,54 @@ const CartItem = ({ item }) => {
 };
 
 const Cart = () => {
-  const { cartItems } = useCart();
+  const { cartItems, clearCart } = useCart();
+  const [isCheckingOut, setIsCheckingOut] = React.useState(false);
+  const navigate = useNavigate();
 
-  const subtotal = cartItems.reduce((sum, item) => sum + parseFloat(item.price.slice(1)) * item.quantity, 0);
+  const subtotal = cartItems.reduce((sum, item) => {
+    const price = typeof item.price === 'string' ? parseFloat(item.price.slice(1)) : item.price;
+    return sum + price * item.quantity;
+  }, 0);
   const tax = subtotal * 0.08; // 8% tax
   const total = subtotal + tax;
+
+  const handleCheckout = async () => {
+    setIsCheckingOut(true);
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        navigate('/login');
+        return;
+      }
+
+      const response = await fetch('/api/orders', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          items: cartItems,
+          totalAmount: total,
+          type: 'app'
+        })
+      });
+
+      if (response.ok) {
+        clearCart();
+        alert('Order placed successfully! You will receive points once confirmed.');
+        navigate('/app');
+      } else {
+        const errorData = await response.json().catch(() => ({}));
+        alert(errorData.message || 'Failed to place order.');
+      }
+    } catch (error) {
+      console.error('Checkout error:', error);
+      alert(`Error processing checkout: ${error.message}`);
+    } finally {
+      setIsCheckingOut(false);
+    }
+  };
 
   return (
     <main className="flex-1 p-10 overflow-y-auto bg-gray-50 dark:bg-slate-900">
@@ -84,8 +127,12 @@ const Cart = () => {
                     <button className="px-4 py-2 rounded-md bg-gray-200 dark:bg-slate-600 text-sm font-medium hover:bg-gray-300 dark:hover:bg-slate-500">Apply</button>
                   </div>
                 </div>
-                <button className="mt-6 w-full inline-flex items-center justify-center px-4 py-3 rounded-md bg-emerald-600 text-white font-medium hover:bg-emerald-700">
-                  <FiCreditCard className="mr-2" /> Proceed to Checkout
+                <button
+                  onClick={handleCheckout}
+                  disabled={isCheckingOut}
+                  className="mt-6 w-full inline-flex items-center justify-center px-4 py-3 rounded-md bg-emerald-600 text-white font-medium hover:bg-emerald-700 disabled:opacity-50"
+                >
+                  <FiCreditCard className="mr-2" /> {isCheckingOut ? 'Processing...' : 'Proceed to Checkout'}
                 </button>
               </div>
             </div>

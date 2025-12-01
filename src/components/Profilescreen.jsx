@@ -213,7 +213,7 @@ const ProfileScreen = () => {
                     <div className="flex flex-col items-center gap-2">
                       <FiFileText className="w-10 h-10 text-gray-400" />
                       <span className="font-medium">No rewards history yet.</span>
-                      <p className="text-sm">Start ordering to earn points!</p>
+                      <p className="text-sm">Start ordering to earn history!</p>
                     </div>
                   </td>
                 </tr>
