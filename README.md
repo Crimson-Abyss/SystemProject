@@ -25,7 +25,7 @@ This is a full-stack web application for a customer loyalty and rewards program.
 *   **Backend**:
     *   [Node.js](https://nodejs.org/)
     *   [Express](https://expressjs.com/) (implied for API routing)
-    *   A database (e.g., MongoDB, PostgreSQL) would be used for data persistence.
+    *   [SQLite 3](https://www.sqlite.org/)
 
 ## 🚀 Getting Started
 
