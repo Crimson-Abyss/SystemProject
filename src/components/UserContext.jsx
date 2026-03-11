@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect } from 'react';
+import { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import PropTypes from 'prop-types';
 
 const UserContext = createContext();
@@ -25,7 +25,7 @@ export const UserProvider = ({ children }) => {
     return { name: 'User', initial: 'U', avatarUrl: null, points: 0, role: 'user' };
   });
 
-  const refreshUser = async () => {
+  const refreshUser = useCallback(async () => {
     try {
       const token = localStorage.getItem('token');
       if (!token) return;
@@ -49,7 +49,7 @@ export const UserProvider = ({ children }) => {
     } catch (error) {
       console.error("Failed to refresh user", error);
     }
-  };
+  }, []);
 
   return (
     <UserContext.Provider value={{ user, setUser, refreshUser }}>

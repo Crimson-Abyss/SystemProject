@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { FaShoppingBag, FaTrash, FaPlus, FaMinus, FaCoffee } from 'react-icons/fa';
+import { FaShoppingBag, FaTrash, FaPlus, FaMinus, FaCoffee, FaCheck } from 'react-icons/fa';
 import ReceiptModal from './ReceiptModal';
 
 const POSSystem = () => {
@@ -47,7 +47,7 @@ const POSSystem = () => {
         }));
     };
 
-    const totalAmount = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+    const totalAmount = cart.reduce((sum, item) => sum + ((typeof item.price === 'string' ? parseFloat(item.price.slice(1)) : item.price) * item.quantity), 0);
 
     const handleCheckout = async () => {
         if (cart.length === 0) return;
@@ -90,77 +90,98 @@ const POSSystem = () => {
     };
 
     return (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 h-[calc(100vh-100px)]">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 h-[calc(100vh-120px)] animate-fade-in-up">
             {/* Menu Section */}
-            <div className="lg:col-span-2 bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-6 overflow-y-auto transition-colors duration-200">
-                <h2 className="text-xl font-bold text-gray-800 dark:text-white mb-6 flex items-center gap-2">
-                    <FaCoffee className="text-rose-500" /> Menu Items
-                </h2>
+            <div className="lg:col-span-2 glass-dark bg-white/ rounded-2xl shadow-xl border border-white/ p-4 sm:p-6 overflow-y-auto flex flex-col items-start w-full">
+                <div className="flex items-center justify-between w-full mb-6">
+                    <h2 className="text-xl font-bold text-white flex items-center gap-2 font-['Outfit']">
+                        <div className="p-2 rounded-lg bg-emerald-500/20 text-emerald-400">
+                            <FaCoffee />
+                        </div>
+                        Quick Add Menu
+                    </h2>
+                    <div className="bg-white/5 px-3 py-1 rounded-full text-xs font-semibold text-gray-400 border border-white/10">
+                        {menuItems.length} items
+                    </div>
+                </div>
 
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4 w-full">
                     {menuItems.map(item => (
                         <button
                             key={item.id}
                             onClick={() => addToCart(item)}
-                            className="flex flex-col items-start p-4 rounded-xl border border-gray-100 dark:border-gray-700 hover:border-rose-200 dark:hover:border-rose-500/30 hover:bg-rose-50 dark:hover:bg-rose-900/20 transition-all group text-left"
+                            className="flex flex-col items-start p-4 rounded-xl border border-white/ bg-white/ hover:border-emerald-500/30 hover:bg-emerald-500/10 hover:shadow-[0_0_15px_rgba(16,185,129,0.1)] transition-all group text-left w-full hover-lift"
                         >
-                            <div className="w-full aspect-square bg-gray-100 dark:bg-gray-700 rounded-lg mb-3 flex items-center justify-center text-4xl group-hover:scale-105 transition-transform">
-                                🧋
+                            <div className="w-full aspect-square bg-linear-to-br from-white/5 to-white/ rounded-lg mb-3 flex items-center justify-center text-4xl group-hover:scale-105 transition-transform overflow-hidden relative">
+                                {item.imageUrl ? <img src={item.imageUrl} alt={item.name} className="w-full h-full object-cover" /> : '🧋'}
+                                {item.badge && <span className="absolute top-1 left-1 bg-emerald-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded uppercase">{item.badge}</span>}
                             </div>
-                            <h3 className="font-semibold text-gray-800 dark:text-gray-200">{item.name}</h3>
-                            <p className="text-rose-600 dark:text-rose-400 font-bold mt-1">₱{item.price.toFixed(2)}</p>
+                            <h3 className="font-semibold text-gray-200 text-sm leading-tight mb-1 truncate w-full">{item.name}</h3>
+                            <p className="text-emerald-400 font-bold text-sm">₱{(typeof item.price === 'string' ? parseFloat(item.price.slice(1)) : item.price).toFixed(2)}</p>
                         </button>
                     ))}
                 </div>
             </div>
 
             {/* Cart Section */}
-            <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 flex flex-col h-full transition-colors duration-200">
-                <div className="p-6 border-b border-gray-100 dark:border-gray-700">
-                    <h2 className="text-xl font-bold text-gray-800 dark:text-white flex items-center gap-2">
-                        <FaShoppingBag className="text-rose-500" /> Current Order
+            <div className="glass-dark bg-[#0a0f1b]/80 rounded-2xl shadow-xl border border-white/ flex flex-col h-full w-full">
+                <div className="p-5 border-b border-white/ flex items-center justify-between">
+                    <h2 className="text-lg font-bold text-white flex items-center gap-2 font-['Outfit']">
+                        <FaShoppingBag className="text-emerald-400" /> Current Order
                     </h2>
+                    <span className="bg-emerald-500/20 text-emerald-400 text-xs font-bold px-2 py-1 rounded-full">{cart.reduce((s,i)=>s+i.quantity,0)} items</span>
                 </div>
 
-                <div className="flex-1 overflow-y-auto p-4 space-y-3">
+                <div className="flex-1 overflow-y-auto p-4 space-y-3 custom-scrollbar">
                     {cart.length === 0 ? (
-                        <div className="h-full flex flex-col items-center justify-center text-gray-400 dark:text-gray-500">
-                            <FaShoppingBag className="text-4xl mb-2 opacity-20" />
-                            <p>Cart is empty</p>
+                        <div className="h-full flex flex-col items-center justify-center text-gray-500">
+                            <div className="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center mb-3">
+                                <FaShoppingBag className="text-2xl opacity-40" />
+                            </div>
+                            <p className="font-medium text-sm">Cart is empty</p>
                         </div>
                     ) : (
                         cart.map(item => (
-                            <div key={item.id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-xl">
-                                <div className="flex-1">
-                                    <h4 className="font-medium text-gray-800 dark:text-gray-200">{item.name}</h4>
-                                    <p className="text-sm text-gray-500 dark:text-gray-400">${item.price.toFixed(2)}</p>
-                                </div>
-                                <div className="flex items-center gap-3">
-                                    <div className="flex items-center bg-white dark:bg-gray-600 rounded-lg border border-gray-200 dark:border-gray-500">
-                                        <button onClick={() => updateQuantity(item.id, -1)} className="p-2 hover:bg-gray-50 dark:hover:bg-gray-500 text-gray-600 dark:text-gray-200"><FaMinus size={10} /></button>
-                                        <span className="w-8 text-center text-sm font-medium text-gray-800 dark:text-white">{item.quantity}</span>
-                                        <button onClick={() => updateQuantity(item.id, 1)} className="p-2 hover:bg-gray-50 dark:hover:bg-gray-500 text-gray-600 dark:text-gray-200"><FaPlus size={10} /></button>
-                                    </div>
-                                    <button onClick={() => removeFromCart(item.id)} className="text-red-400 hover:text-red-600 dark:hover:text-red-300 p-2">
-                                        <FaTrash />
+                            <div key={item.id} className="flex flex-col p-3 bg-white/ border border-white/ rounded-xl hover:bg-white/ transition-colors animate-fade-in">
+                                <div className="flex justify-between items-start mb-2">
+                                    <h4 className="font-medium text-gray-200 text-sm truncate pr-2">{item.name}</h4>
+                                    <button onClick={() => removeFromCart(item.id)} className="text-gray-500 hover:text-rose-400 p-1 transition-colors">
+                                        <FaTrash size={12} />
                                     </button>
+                                </div>
+                                <div className="flex items-center justify-between">
+                                    <p className="text-sm font-bold text-emerald-400">₱{((typeof item.price === 'string' ? parseFloat(item.price.slice(1)) : item.price) * item.quantity).toFixed(2)}</p>
+                                    <div className="flex items-center bg-black/40 rounded-lg border border-white/10 p-0.5">
+                                        <button onClick={() => updateQuantity(item.id, -1)} className="p-1.5 hover:bg-white/10 rounded-md text-gray-400 hover:text-white transition-colors"><FaMinus size={10} /></button>
+                                        <span className="w-8 text-center text-sm font-bold text-white">{item.quantity}</span>
+                                        <button onClick={() => updateQuantity(item.id, 1)} className="p-1.5 hover:bg-white/10 rounded-md text-gray-400 hover:text-white transition-colors"><FaPlus size={10} /></button>
+                                    </div>
                                 </div>
                             </div>
                         ))
                     )}
                 </div>
 
-                <div className="p-6 border-t border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-700/30 rounded-b-2xl">
-                    <div className="flex justify-between items-center mb-4 text-lg font-bold text-gray-800 dark:text-white">
-                        <span>Total</span>
-                        <span>${totalAmount.toFixed(2)}</span>
+                <div className="p-5 border-t border-white/ bg-black/20 rounded-b-2xl">
+                    <div className="flex justify-between items-center mb-4 text-white">
+                        <span className="text-sm text-gray-400 font-medium">Subtotal</span>
+                        <span className="text-lg font-bold">₱{totalAmount.toFixed(2)}</span>
                     </div>
                     <button
                         onClick={handleCheckout}
                         disabled={cart.length === 0 || isProcessing}
-                        className="w-full py-4 bg-rose-600 text-white rounded-xl font-bold text-lg hover:bg-rose-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg shadow-rose-200 dark:shadow-none"
+                        className="w-full py-4 btn-primary rounded-xl font-bold text-base flex items-center justify-center gap-2 group disabled:opacity-50 disabled:animate-none"
                     >
-                        {isProcessing ? 'Processing...' : 'Complete Order'}
+                        {isProcessing ? (
+                            <span className="flex items-center gap-2">
+                              <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" /></svg>
+                              Processing...
+                            </span>
+                        ) : (
+                            <>
+                                <FaCheck className="group-hover:scale-125 transition-transform" /> Complete Order
+                            </>
+                        )}
                     </button>
                 </div>
             </div>

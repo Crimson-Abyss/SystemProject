@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { FaCheckCircle, FaClock, FaUser, FaBox, FaReceipt } from 'react-icons/fa';
+import { FaCheckCircle, FaClock, FaUser, FaReceipt } from 'react-icons/fa';
 import ReceiptModal from './ReceiptModal';
 
 const OrderManagement = () => {
@@ -49,63 +49,78 @@ const OrderManagement = () => {
         }
     };
 
-    if (loading) return <div className="p-8 text-center text-gray-500">Loading orders...</div>;
+    if (loading) return (
+        <div className="flex flex-col items-center justify-center p-12 text-gray-500 animate-pulse">
+            <div className="w-12 h-12 border-4 border-emerald-500/20 border-t-emerald-500 rounded-full animate-spin mb-4" />
+            <p className="font-medium text-sm">Loading orders...</p>
+        </div>
+    );
 
     const pendingOrders = orders.filter(o => o.status === 'pending' && o.type === 'app');
     const completedOrders = orders.filter(o => o.status === 'completed' || o.type === 'instore');
 
     return (
-        <div className="space-y-8">
+        <div className="space-y-8 animate-fade-in-up">
             {/* Pending Orders Section */}
             <section>
-                <h2 className="text-xl font-bold text-gray-800 dark:text-white mb-4 flex items-center gap-2">
-                    <div className="w-3 h-3 rounded-full bg-amber-500 animate-pulse" />
-                    Pending App Orders
-                </h2>
+                <div className="flex items-center gap-3 mb-5">
+                    <div className="flex h-3 w-3 relative">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
+                      <span className="relative inline-flex rounded-full h-3 w-3 bg-amber-500"></span>
+                    </div>
+                    <h2 className="text-xl font-bold text-white font-['Outfit']">Pending App Orders</h2>
+                    <span className="bg-amber-500/20 text-amber-400 text-xs font-bold px-2 py-0.5 rounded-full border border-amber-500/30">
+                        {pendingOrders.length}
+                    </span>
+                </div>
 
                 <div className="grid gap-4">
                     {pendingOrders.length === 0 ? (
-                        <div className="p-8 bg-gray-50 dark:bg-gray-800 rounded-xl text-center text-gray-400 dark:text-gray-500 border border-dashed border-gray-200 dark:border-gray-700">
-                            No pending orders right now
+                        <div className="p-8 glass-dark bg-white/ rounded-2xl text-center text-gray-500 border border-dashed border-white/10 flex flex-col items-center justify-center">
+                            <FaCheckCircle className="text-3xl mb-3 opacity-20" />
+                            <p className="font-medium">All caught up! No pending orders right now.</p>
                         </div>
                     ) : (
                         pendingOrders.map(order => (
-                            <div key={order.id} className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-amber-100 dark:border-amber-900/30 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 transition-colors duration-200">
+                            <div key={order.id} className="glass-dark bg-amber-500/ p-5 sm:p-6 rounded-2xl shadow-xl border border-amber-500/20 flex flex-col lg:flex-row justify-between items-start lg:items-center gap-5 transition-all hover:bg-amber-500/">
                                 <div className="flex-1">
-                                    <div className="flex items-center gap-3 mb-2">
-                                        <span className="bg-amber-100 dark:bg-amber-900/50 text-amber-700 dark:text-amber-400 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider">
+                                    <div className="flex flex-wrap items-center gap-3 mb-3">
+                                        <span className="bg-amber-500/20 text-amber-400 border border-amber-500/30 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider shadow-[0_0_10px_rgba(245,158,11,0.2)]">
                                             Order #{order.id}
                                         </span>
-                                        <span className="text-gray-500 dark:text-gray-400 text-sm flex items-center gap-1">
-                                            <FaClock size={12} /> {new Date(order.createdAt).toLocaleTimeString()}
+                                        <span className="text-gray-400 text-sm flex items-center gap-1.5 font-medium">
+                                            <FaClock className="text-gray-500" /> {new Date(order.createdAt).toLocaleTimeString()}
                                         </span>
                                     </div>
-                                    <div className="flex items-center gap-2 text-gray-800 dark:text-white font-medium mb-1">
-                                        <FaUser className="text-gray-400" /> {order.userName || 'Unknown User'}
+                                    <div className="flex items-center gap-2 text-gray-200 font-bold text-lg mb-1">
+                                        <div className="w-6 h-6 rounded-full bg-white/10 flex items-center justify-center">
+                                            <FaUser className="text-xs text-white" />
+                                        </div>
+                                        {order.userName || 'Unknown User'}
                                     </div>
-                                    <div className="text-sm text-gray-600 dark:text-gray-300">
-                                        {order.items.length} items • Total: ${order.totalAmount.toFixed(2)}
+                                    <div className="text-sm text-gray-400 font-medium">
+                                        {order.items.length} items • <span className="text-emerald-400 font-bold">₱{order.totalAmount.toFixed(2)}</span>
                                     </div>
                                 </div>
 
-                                <div className="flex items-center gap-4 w-full md:w-auto">
-                                    <div className="flex-1 md:flex-none">
-                                        <div className="text-xs text-gray-400 mb-1">Items</div>
-                                        <div className="flex gap-2">
+                                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-6 w-full lg:w-auto">
+                                    <div className="flex-1 sm:flex-none">
+                                        <div className="text-xs font-semibold text-gray-500 mb-2 uppercase tracking-wider">Order Items</div>
+                                        <div className="flex flex-wrap gap-2">
                                             {order.items.slice(0, 3).map((item, i) => (
-                                                <span key={i} className="bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded text-xs text-gray-600 dark:text-gray-300">
-                                                    {item.quantity}x {item.name}
+                                                <span key={i} className="bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg text-xs font-medium text-gray-300">
+                                                    <span className="text-amber-400 mr-1">{item.quantity}x</span> {item.name}
                                                 </span>
                                             ))}
-                                            {order.items.length > 3 && <span className="text-xs text-gray-400">+{order.items.length - 3} more</span>}
+                                            {order.items.length > 3 && <span className="text-xs text-gray-500 px-2 py-1 flex items-center bg-white/5 rounded-lg border border-white/5 disabled select-none">+{order.items.length - 3} more</span>}
                                         </div>
                                     </div>
 
                                     <button
                                         onClick={() => handleConfirmOrder(order.id)}
-                                        className="bg-green-500 hover:bg-green-600 text-white px-6 py-3 rounded-xl font-bold shadow-lg shadow-green-200 dark:shadow-none transition-all flex items-center gap-2 whitespace-nowrap"
+                                        className="w-full sm:w-auto bg-linear-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-white px-6 py-3 rounded-xl font-bold shadow-lg shadow-emerald-500/20 transition-all flex items-center justify-center gap-2 whitespace-nowrap group"
                                     >
-                                        <FaCheckCircle /> Confirm & Ready
+                                        <FaCheckCircle className="group-hover:scale-110 transition-transform" /> Confirm & Ready
                                     </button>
                                 </div>
                             </div>
@@ -115,52 +130,59 @@ const OrderManagement = () => {
             </section>
 
             {/* Recent History Section */}
-            <section>
-                <h2 className="text-xl font-bold text-gray-800 dark:text-white mb-4 text-opacity-60">Recent History</h2>
-                <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden transition-colors duration-200">
-                    <table className="w-full text-left">
-                        <thead className="bg-gray-50 dark:bg-gray-700/50 text-gray-500 dark:text-gray-400 text-xs uppercase tracking-wider">
-                            <tr>
-                                <th className="p-4">Order ID</th>
-                                <th className="p-4">Type</th>
-                                <th className="p-4">Customer</th>
-                                <th className="p-4">Amount</th>
-                                <th className="p-4">Status</th>
-                                <th className="p-4">Time</th>
-                                <th className="p-4 text-right">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
-                            {completedOrders.slice(0, 10).map(order => (
-                                <tr key={order.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
-                                    <td className="p-4 font-mono text-sm text-gray-600 dark:text-gray-300">#{order.id}</td>
-                                    <td className="p-4">
-                                        <span className={`px-2 py-1 rounded text-xs font-medium ${order.type === 'instore' ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400' : 'bg-purple-50 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400'
-                                            }`}>
-                                            {order.type === 'instore' ? 'In-Store' : 'App Order'}
-                                        </span>
-                                    </td>
-                                    <td className="p-4 text-sm text-gray-800 dark:text-gray-200">{order.userName || 'Walk-in Customer'}</td>
-                                    <td className="p-4 text-sm font-medium text-gray-800 dark:text-gray-200">${order.totalAmount.toFixed(2)}</td>
-                                    <td className="p-4">
-                                        <span className="flex items-center gap-1 text-green-600 dark:text-green-400 text-xs font-bold uppercase">
-                                            <FaCheckCircle /> Completed
-                                        </span>
-                                    </td>
-                                    <td className="p-4 text-sm text-gray-400">{new Date(order.createdAt).toLocaleDateString()}</td>
-                                    <td className="p-4 text-right">
-                                        <button
-                                            onClick={() => setSelectedOrder(order)}
-                                            className="text-gray-500 hover:text-rose-600 dark:hover:text-rose-400 transition-colors"
-                                            title="View Receipt"
-                                        >
-                                            <FaReceipt />
-                                        </button>
-                                    </td>
+            <section className="pt-4">
+                <h2 className="text-xl font-bold text-white mb-5 font-['Outfit'] flex items-center gap-2">
+                    Recent History
+                </h2>
+                <div className="glass-dark bg-white/ rounded-2xl shadow-xl border border-white/ overflow-hidden">
+                    <div className="overflow-x-auto">
+                        <table className="w-full text-left">
+                            <thead className="bg-black/40 border-b border-white/ text-gray-400 text-xs uppercase tracking-wider font-bold">
+                                <tr>
+                                    <th className="p-4 whitespace-nowrap">Order ID</th>
+                                    <th className="p-4 whitespace-nowrap">Type</th>
+                                    <th className="p-4 whitespace-nowrap">Customer</th>
+                                    <th className="p-4 whitespace-nowrap">Amount</th>
+                                    <th className="p-4 whitespace-nowrap">Status</th>
+                                    <th className="p-4 whitespace-nowrap">Time</th>
+                                    <th className="p-4 text-right whitespace-nowrap">Actions</th>
                                 </tr>
-                            ))}
-                        </tbody>
-                    </table>
+                            </thead>
+                            <tbody className="divide-y divide-white/">
+                                {completedOrders.length > 0 ? completedOrders.slice(0, 10).map(order => (
+                                    <tr key={order.id} className="hover:bg-white/ transition-colors group">
+                                        <td className="p-4 font-mono text-sm text-gray-400">#{order.id}</td>
+                                        <td className="p-4">
+                                            <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider border ${order.type === 'instore' ? 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20' : 'bg-purple-500/10 text-purple-400 border-purple-500/20'}`}>
+                                                {order.type === 'instore' ? 'In-Store' : 'App Order'}
+                                            </span>
+                                        </td>
+                                        <td className="p-4 text-sm font-medium text-gray-200">{order.userName || 'Walk-in Customer'}</td>
+                                        <td className="p-4 text-sm font-bold text-emerald-400">₱{order.totalAmount.toFixed(2)}</td>
+                                        <td className="p-4">
+                                            <span className="flex items-center gap-1.5 text-emerald-400 text-[10px] font-bold uppercase tracking-wider">
+                                                <FaCheckCircle /> Completed
+                                            </span>
+                                        </td>
+                                        <td className="p-4 text-sm font-medium text-gray-500">{new Date(order.createdAt).toLocaleDateString()}</td>
+                                        <td className="p-4 text-right">
+                                            <button
+                                                onClick={() => setSelectedOrder(order)}
+                                                className="p-2 rounded-lg text-gray-400 hover:text-emerald-400 hover:bg-emerald-500/10 transition-colors"
+                                                title="View Receipt"
+                                            >
+                                                <FaReceipt className="w-4 h-4" />
+                                            </button>
+                                        </td>
+                                    </tr>
+                                )) : (
+                                    <tr>
+                                        <td colSpan="7" className="p-8 text-center text-gray-500 text-sm font-medium">No completed orders yet.</td>
+                                    </tr>
+                                )}
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </section>
 

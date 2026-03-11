@@ -1,13 +1,14 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Scanner } from '@yudiel/react-qr-scanner';
 import { useNavigate } from 'react-router-dom';
+import { FiCamera, FiZap, FiCopy, FiExternalLink, FiX } from 'react-icons/fi';
 
 const QRScreen = () => {
   const navigate = useNavigate();
   const [result, setResult] = useState(null);
   const [error, setError] = useState(null);
-  const [permission, setPermission] = useState('prompt'); // 'granted' | 'denied' | 'prompt'
-  const [facingMode, setFacingMode] = useState('environment'); // 'user' | 'environment'
+  const [permission, setPermission] = useState('prompt');
+  const [facingMode, setFacingMode] = useState('environment');
   const [torch, setTorch] = useState(false);
 
   const onScan = useCallback((results) => {
@@ -16,24 +17,20 @@ const QRScreen = () => {
     const text = results[0].rawValue;
     setResult(text);
     
-    // Check if it's a claim URL
     if (text && text.includes('/app/claim/')) {
-        // Extract the path if it's a full URL
-        const parts = text.split('/app/claim/');
-        if (parts.length > 1) {
-            const path = parts[1];
-            navigate(`/app/claim/${path}`);
-        }
+      const parts = text.split('/app/claim/');
+      if (parts.length > 1) {
+        const path = parts[1];
+        navigate(`/app/claim/${path}`);
+      }
     }
   }, [navigate]);
 
   const onError = useCallback((err) => {
-    // Suppress noisy NotFound errors during scanning, show others
     if (err?.name === 'NotFoundException') return;
     setError(err?.message || String(err));
   }, []);
 
-  // Check camera permissions (best-effort)
   useEffect(() => {
     let cancelled = false;
     if (navigator?.permissions?.query) {
@@ -46,19 +43,20 @@ const QRScreen = () => {
 
   const constraints = useMemo(() => ({
     facingMode,
-    // Some Android devices support torch via advanced constraints
     ...(torch ? { advanced: [{ torch: true }] } : {}),
   }), [facingMode, torch]);
 
   return (
-    <main className="flex-1 flex flex-col items-center text-center p-6 gap-4">
-      <h1 className="text-3xl font-bold text-gray-900">Scan to Earn</h1>
-      <p className="max-w-md text-gray-600">
-        Use your device camera to scan the QR code at the your receipt.
-      </p>
+    <main className="flex-1 flex flex-col items-center text-center p-6 gap-5 bg-gray-50 dark:bg-[#0a0e18]">
+      <div className="animate-fade-in-up">
+        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white font-[Outfit]">Scan to Earn</h1>
+        <p className="max-w-md text-gray-500 dark:text-gray-400 mt-1 text-sm sm:text-base">
+          Use your device camera to scan the QR code on your receipt.
+        </p>
+      </div>
 
-      <div className="w-full max-w-sm">
-        <div className="relative w-full aspect-square bg-black rounded-2xl overflow-hidden">
+      <div className="w-full max-w-sm animate-fade-in-up delay-200">
+        <div className="relative w-full aspect-square bg-black rounded-2xl overflow-hidden shadow-2xl shadow-emerald-500/10">
           <Scanner
             constraints={constraints}
             onScan={onScan}
@@ -67,76 +65,81 @@ const QRScreen = () => {
             videoStyle={{ width: '100%', height: '100%', objectFit: 'cover' }}
           />
 
-          {/* Overlay */}
-          <div className="pointer-events-none absolute inset-0 grid grid-cols-3 grid-rows-3">
-            <div className="border-t-4 border-l-4 border-emerald-500 rounded-tl-2xl" />
-            <div />
-            <div className="border-t-4 border-r-4 border-emerald-500 rounded-tr-2xl" />
-            <div />
-            <div className="border-2 border-dashed border-white/30" />
-            <div />
-            <div className="border-b-4 border-l-4 border-emerald-500 rounded-bl-2xl" />
-            <div />
-            <div className="border-b-4 border-r-4 border-emerald-500 rounded-br-2xl" />
+          {/* Corner overlay with animated scan line */}
+          <div className="pointer-events-none absolute inset-0">
+            {/* Scan line animation */}
+            <div className="absolute left-[15%] right-[15%] h-0.5 bg-linear-to-r from-transparent via-emerald-400 to-transparent shadow-lg shadow-emerald-400/50" style={{ animation: 'scan-line 3s ease-in-out infinite' }} />
+            
+            {/* Corners */}
+            <div className="absolute top-3 left-3 w-12 h-12 border-t-3 border-l-3 border-emerald-400 rounded-tl-xl" />
+            <div className="absolute top-3 right-3 w-12 h-12 border-t-3 border-r-3 border-emerald-400 rounded-tr-xl" />
+            <div className="absolute bottom-3 left-3 w-12 h-12 border-b-3 border-l-3 border-emerald-400 rounded-bl-xl" />
+            <div className="absolute bottom-3 right-3 w-12 h-12 border-b-3 border-r-3 border-emerald-400 rounded-br-xl" />
+            
+            {/* Dark overlay outside scan area */}
+            <div className="absolute inset-0 bg-linear-to-b from-black/30 via-transparent to-black/30" />
           </div>
         </div>
 
         {/* Controls */}
-        <div className="mt-3 flex justify-between items-center text-left">
+        <div className="mt-4 flex justify-between items-center">
           <div className="flex gap-2">
             <button
               type="button"
               onClick={() => setFacingMode((m) => (m === 'environment' ? 'user' : 'environment'))}
-              className="px-3 py-1.5 rounded-md bg-neutral-900 text-white hover:bg-neutral-800"
+              className="btn-ghost text-sm flex items-center gap-1.5 px-3 py-2 rounded-xl dark:border-white/10 dark:text-gray-300"
             >
-              Flip Camera
+              <FiCamera className="w-4 h-4" /> Flip
             </button>
             <button
               type="button"
-              onClick={() => setTorch ((currentTorchStatus) => !currentTorchStatus)}
-              className={`px-3 py-1.5 rounded-md ${torch ? 'bg-amber-500 hover:bg-amber-600' : 'bg-neutral-900 hover:bg-neutral-800'} text-white`}
+              onClick={() => setTorch((currentTorchStatus) => !currentTorchStatus)}
+              className={`text-sm flex items-center gap-1.5 px-3 py-2 rounded-xl font-medium transition-all ${torch ? 'bg-amber-500 text-white shadow-md shadow-amber-500/30' : 'btn-ghost dark:border-white/10 dark:text-gray-300'}`}
             >
-              {torch ? 'Torch ON' : 'Torch OFF'}
+              <FiZap className="w-4 h-4" /> {torch ? 'ON' : 'OFF'}
             </button>
           </div>
-          <span className="text-xs text-gray-500">Permission: {permission}</span>
+          <span className="text-xs text-gray-400 dark:text-gray-500 bg-gray-100 dark:bg-white/5 px-2 py-1 rounded-full">{permission}</span>
         </div>
       </div>
 
-      {/* Result / Error */}
+      {/* Result */}
       {result && (
-        <div className="w-full max-w-sm bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-md p-3 break-all">
-          <div className="font-semibold">Scanned:</div>
-          <div className="text-sm mt-1">{result}</div>
-          <div className="mt-2 flex gap-2">
-            <a href={result} target="_blank" rel="noreferrer" className="text-emerald-700 underline text-sm">Open</a>
+        <div className="w-full max-w-sm glass dark:glass bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20 text-emerald-800 dark:text-emerald-300 rounded-xl p-4 break-all animate-scale-in">
+          <div className="font-semibold flex items-center gap-2">✅ Scanned:</div>
+          <div className="text-sm mt-1.5 bg-white/50 dark:bg-black/20 rounded-lg p-2 font-mono">{result}</div>
+          <div className="mt-3 flex gap-3">
+            <a href={result} target="_blank" rel="noreferrer" className="text-emerald-600 dark:text-emerald-400 font-medium text-sm flex items-center gap-1 hover:underline">
+              <FiExternalLink className="w-3.5 h-3.5" /> Open
+            </a>
             <button
               type="button"
-              className="text-emerald-700 underline text-sm"
+              className="text-emerald-600 dark:text-emerald-400 font-medium text-sm flex items-center gap-1 hover:underline"
               onClick={() => navigator.clipboard?.writeText(result)}
             >
-              Copy
+              <FiCopy className="w-3.5 h-3.5" /> Copy
             </button>
             <button
               type="button"
-              className="text-emerald-700 underline text-sm"
+              className="text-emerald-600 dark:text-emerald-400 font-medium text-sm flex items-center gap-1 hover:underline"
               onClick={() => setResult(null)}
             >
-              Clear
+              <FiX className="w-3.5 h-3.5" /> Clear
             </button>
           </div>
         </div>
       )}
 
+      {/* Error */}
       {error && (
-        <div className="w-full max-w-sm bg-rose-50 border border-rose-200 text-rose-800 rounded-md p-3">
-          <div className="font-semibold">Camera error</div>
+        <div className="w-full max-w-sm glass dark:glass bg-rose-50 dark:bg-rose-500/10 border border-rose-200 dark:border-rose-500/20 text-rose-800 dark:text-rose-300 rounded-xl p-4 animate-scale-in">
+          <div className="font-semibold">⚠️ Camera error</div>
           <div className="text-sm mt-1">{error}</div>
         </div>
       )}
 
-      <p className="text-sm text-gray-500">
-        Earn points by scanning the QR Code in your recipt if you ordered in the store
+      <p className="text-sm text-gray-400 dark:text-gray-500 max-w-md">
+        Earn points by scanning the QR Code on your receipt if you ordered in the store.
       </p>
     </main>
   );

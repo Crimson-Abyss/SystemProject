@@ -17,15 +17,15 @@ const AppLayout = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-100 dark:bg-gray-900">
+    <div className="min-h-screen bg-gray-50 dark:bg-[#0a0e18] transition-colors duration-300">
       <Sidebar />
       <div className="pt-16">
-        <Outlet /> {/* Child routes will render here */}
+        <Outlet />
       </div>
 
       {/* Global Notification */}
       {notification && (
-        <div className="fixed top-20 left-1/2 -translate-x-1/2 z-50 bg-emerald-600 text-white px-6 py-3 rounded-full shadow-lg transition-opacity duration-300">
+        <div className="fixed top-20 left-1/2 -translate-x-1/2 z-50 glass dark:glass bg-emerald-500/90 dark:bg-emerald-600/90 text-white px-6 py-3 rounded-full shadow-lg shadow-emerald-500/20 animate-fade-in-down font-medium">
           {notification}
         </div>
       )}
@@ -34,12 +34,12 @@ const AppLayout = () => {
       {showCartButton && (
         <Link
           to="/app/cart"
-          className="fixed bottom-8 right-8 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-emerald-600 text-white shadow-lg transition-transform hover:scale-110 hover:bg-emerald-700"
+          className={`fixed bottom-6 right-6 sm:bottom-8 sm:right-8 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-linear-to-br from-emerald-500 to-teal-500 text-white shadow-lg shadow-emerald-500/30 transition-all duration-300 hover:scale-110 hover:shadow-xl hover:shadow-emerald-500/40 ${cartItemCount > 0 ? 'animate-pulse-glow' : ''}`}
           aria-label={`View cart with ${cartItemCount} items`}
         >
           <FiShoppingBag className="h-6 w-6" />
           {cartItemCount > 0 && (
-            <span className="absolute -top-1 -right-1 flex h-6 w-6 items-center justify-center rounded-full bg-rose-500 text-xs font-bold">{cartItemCount}</span>
+            <span className="absolute -top-1 -right-1 flex h-6 w-6 items-center justify-center rounded-full bg-rose-500 text-xs font-bold shadow-md animate-scale-in">{cartItemCount}</span>
           )}
         </Link>
       )}
