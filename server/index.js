@@ -5,7 +5,8 @@ const crypto = require('crypto');
 const nodemailer = require('nodemailer');
 const { OAuth2Client } = require('google-auth-library');
 const db = require('./database.js');
-
+const jwt = require('jsonwebtoken');
+const bcrypt = require('bcrypt');
 const app = express();
 const port = 3002;
 const JWT_SECRET = 'your-secret-key-change-this-in-production';
