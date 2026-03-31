@@ -22,6 +22,8 @@ const Landing = lazy(() => import('./components/Landing.jsx'));
 const Login = lazy(() => import('./components/Login.jsx'));
 const AdminLogin = lazy(() => import('./components/AdminLogin.jsx'));
 const Signup = lazy(() => import('./components/Signup.jsx'));
+const ForgotPassword = lazy(() => import('./components/ForgotPassword.jsx'));
+const ResetPassword = lazy(() => import('./components/ResetPassword.jsx'));
 const Settings = lazy(() => import('./components/Settings.jsx'));
 const Products = lazy(() => import('./components/Products.jsx'));
 const Rewards = lazy(() => import('./components/Rewards.jsx'));
@@ -52,6 +54,8 @@ const router = createBrowserRouter([
   { path: "/login", element: <SuspensePage><Login /></SuspensePage> },
   { path: "/admin/login", element: <SuspensePage><AdminLogin /></SuspensePage> },
   { path: "/signup", element: <SuspensePage><Signup /></SuspensePage> },
+  { path: "/forgot-password", element: <SuspensePage><ForgotPassword /></SuspensePage> },
+  { path: "/reset-password/:token", element: <SuspensePage><ResetPassword /></SuspensePage> },
   {
     path: "/admin",
     element: (

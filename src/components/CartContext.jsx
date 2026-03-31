@@ -11,46 +11,45 @@ export const CartProvider = ({ children }) => {
   const [notification, setNotification] = useState('');
 
   const addToCart = (product) => {
+    // Use cartId if provided (includes size info), otherwise fall back to id
+    const cartKey = product.cartId || `${product.id}${product.selectedSize ? `-${product.selectedSize}` : ''}`;
+
     setCartItems(prevItems => {
-      const existingItem = prevItems.find(item => item.id === product.id);
+      const existingItem = prevItems.find(item => (item.cartId || item.id) === cartKey);
       if (existingItem) {
-        // If item already exists, increase its quantity
         return prevItems.map(item =>
-          item.id === product.id ? { ...item, quantity: item.quantity + 1 } : item
+          (item.cartId || item.id) === cartKey ? { ...item, quantity: item.quantity + 1 } : item
         );
       }
-      // Otherwise, add the new product with a quantity of 1
-      return [...prevItems, { ...product, quantity: 1 }];
+      return [...prevItems, { ...product, cartId: cartKey, quantity: 1 }];
     });
-    // Show notification
     setNotification('Added to Cart');
     setTimeout(() => {
       setNotification('');
-    }, 2000); // Hide after 2 seconds
+    }, 2000);
   };
 
   const updateQuantity = (productId, amount) => {
     setCartItems(prevItems => {
       return prevItems.map(item => {
-        if (item.id === productId) {
+        const key = item.cartId || item.id;
+        if (key === productId) {
           const newQuantity = item.quantity + amount;
-          // If new quantity is 0 or less, it will be removed by filter(Boolean)
           return newQuantity > 0 ? { ...item, quantity: newQuantity } : null;
         }
         return item;
-      }).filter(Boolean); // Removes items that became null
+      }).filter(Boolean);
     });
   };
 
   const removeFromCart = (productId) => {
-    setCartItems(prevItems => prevItems.filter(item => item.id !== productId));
+    setCartItems(prevItems => prevItems.filter(item => (item.cartId || item.id) !== productId));
   };
 
   const clearCart = () => {
     setCartItems([]);
   };
 
-  // Calculate the total number of items in the cart
   const cartItemCount = cartItems.reduce((total, item) => total + item.quantity, 0);
 
   const value = {

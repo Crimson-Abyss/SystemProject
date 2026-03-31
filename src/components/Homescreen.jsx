@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { FiCoffee, FiGift, FiShoppingBag, FiStar } from 'react-icons/fi';
-import { Link, NavLink } from 'react-router-dom';
+import { FiCoffee, FiGift, FiShoppingBag, FiStar, FiTrendingUp } from 'react-icons/fi';
+import { Link } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import { useCart } from './CartContext.jsx';
-import { useUser } from './UserContext';
+import { useUser, TIER_CONFIG } from './UserContext';
 import { DashboardSkeleton } from './SkeletonLoader.jsx';
 
 // Sub-component for Offer Cards
@@ -17,7 +17,6 @@ const OfferCard = ({ title, description, index }) => (
       <h3 className="font-bold text-xl text-white">{title}</h3>
       <p className="text-sm text-white/80 mt-1">{description}</p>
     </div>
-    {/* Decorative circle */}
     <div className="absolute -bottom-6 -right-6 w-24 h-24 rounded-full bg-white/10 group-hover:scale-125 transition-transform duration-500" />
   </div>
 );
@@ -35,9 +34,9 @@ const HistoryItem = ({ icon, description, points, index }) => (
       <div className="p-2 bg-emerald-50 dark:bg-emerald-500/10 rounded-full text-emerald-600 dark:text-emerald-400">
         {icon}
       </div>
-      <span className="ml-4 font-medium text-gray-700 dark:text-gray-200">{description}</span>
+      <span className="ml-4 font-medium text-gray-700 dark:text-gray-200 text-sm">{description}</span>
     </div>
-    <span className={`text-sm font-bold ${points > 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-gray-500 dark:text-gray-400'}`}>{points > 0 ? `+${points}` : points} pts</span>
+    <span className={`text-sm font-bold ${points > 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-500 dark:text-rose-400'}`}>{points > 0 ? `+${points}` : points} pts</span>
   </div>
 );
 
@@ -60,14 +59,14 @@ const RedeemCard = ({ title, cost, description, userPoints }) => {
         </div>
         <div className="flex-1">
           <div className="flex items-center justify-between">
-            <h3 className="font-semibold text-gray-800 dark:text-white">{title}</h3>
-            <span className="text-sm text-gray-500 dark:text-gray-400">{cost} pts</span>
+            <h3 className="font-semibold text-gray-800 dark:text-white text-sm">{title}</h3>
+            <span className="text-xs text-gray-500 dark:text-gray-400 font-bold">{cost} pts</span>
           </div>
-          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">{description}</p>
+          <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">{description}</p>
           <button
             type="button"
             disabled={!canRedeem}
-            className="mt-3 btn-primary text-sm px-3 py-1.5 disabled:opacity-40 disabled:cursor-not-allowed disabled:bg-gray-400 disabled:shadow-none"
+            className="mt-3 btn-primary text-xs px-3 py-1.5 disabled:opacity-40 disabled:cursor-not-allowed disabled:bg-gray-400 disabled:shadow-none"
           >
             {canRedeem ? 'Redeem' : 'Not enough points'}
           </button>
@@ -87,41 +86,44 @@ RedeemCard.propTypes = {
 // Product Card
 const ProductCard = ({ product }) => {
   const { addToCart } = useCart();
-  const { name, description, price, imageUrl, badge, rating } = product;
+  const { name, description, price, image, badge, rating } = product;
+  const numPrice = typeof price === 'number' ? price : parseFloat(String(price).replace('₱', ''));
 
   return (
     <div className="bg-white dark:bg-white/5 rounded-xl shadow-md overflow-hidden border border-gray-200/50 dark:border-white/10 transition-all duration-300 hover-lift card-shine flex flex-col group">
-      <div className="relative w-full h-40 bg-gray-100 dark:bg-white/5 overflow-hidden">
+      <div className="relative w-full h-36 bg-gray-100 dark:bg-white/5 overflow-hidden">
         {badge && (
-          <div className="absolute top-2 left-2 z-10 bg-linear-to-r from-emerald-500 to-teal-500 text-white text-xs font-bold px-2.5 py-1 rounded-full shadow-md">
+          <div className="absolute top-2 left-2 z-10 bg-linear-to-r from-emerald-500 to-teal-500 text-white text-[10px] font-bold px-2.5 py-1 rounded-full shadow-md uppercase">
             {badge}
           </div>
         )}
-        {imageUrl ? (
-          <img src={imageUrl} alt={name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+        {image ? (
+          <img src={image} alt={name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" loading="lazy" />
         ) : (
           <div className="w-full h-full flex items-center justify-center">
-            <FiCoffee className="w-12 h-12 text-gray-300 dark:text-gray-600" />
+            <FiCoffee className="w-10 h-10 text-gray-300 dark:text-gray-600" />
           </div>
         )}
       </div>
       <div className="p-4 flex-1 flex flex-col">
         <div className="flex items-center justify-between">
-          <h3 className="font-bold text-lg text-gray-800 dark:text-white truncate">{name}</h3>
-          <div className="flex items-center gap-1 text-amber-500">
-            <FiStar className="w-4 h-4 fill-current" />
-            <span className="text-sm font-medium text-gray-600 dark:text-gray-300">{rating}</span>
-          </div>
+          <h3 className="font-bold text-sm text-gray-800 dark:text-white truncate">{name}</h3>
+          {rating && (
+            <div className="flex items-center gap-0.5 text-amber-500 shrink-0">
+              <FiStar className="w-3 h-3 fill-current" />
+              <span className="text-xs font-medium text-gray-600 dark:text-gray-300">{rating}</span>
+            </div>
+          )}
         </div>
-        <p className="text-sm text-gray-500 dark:text-gray-400 mt-1 flex-1">{description}</p>
-        <div className="mt-4 flex items-center justify-between">
-          <span className="text-xl font-bold text-emerald-600 dark:text-emerald-400">{price}</span>
+        <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 flex-1 line-clamp-2">{description}</p>
+        <div className="mt-3 flex items-center justify-between">
+          <span className="text-lg font-bold text-emerald-600 dark:text-emerald-400">₱{numPrice.toFixed(2)}</span>
           <button
             type="button"
             onClick={(e) => { e.preventDefault(); addToCart(product); }}
-            className="btn-primary text-sm px-3 py-2 flex items-center gap-1.5 group/btn"
+            className="btn-primary text-xs px-3 py-2 flex items-center gap-1 group/btn"
           >
-            <FiShoppingBag className="h-4 w-4 group-hover/btn:animate-bounce-subtle" /> Add
+            <FiShoppingBag className="h-3.5 w-3.5" /> Add
           </button>
         </div>
       </div>
@@ -130,31 +132,18 @@ const ProductCard = ({ product }) => {
 };
 
 ProductCard.propTypes = {
-  product: PropTypes.shape({
-    name: PropTypes.string.isRequired,
-    description: PropTypes.string.isRequired,
-    price: PropTypes.string.isRequired,
-    imageUrl: PropTypes.string,
-    badge: PropTypes.string,
-    rating: PropTypes.number,
-  }).isRequired,
+  product: PropTypes.object.isRequired,
 };
 
 const HomeScreen = () => {
   const { user, refreshUser } = useUser();
   const [featuredRewards, setFeaturedRewards] = useState([]);
+  const [featuredProducts, setFeaturedProducts] = useState([]);
   const [history, setHistory] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-  
-  const products = [
-    { id: 1, name: 'House Blend Coffee', description: 'Our signature rich & smooth drip coffee.', price: '₱175.00', rating: 4.5, badge: 'Bestseller' },
-    { id: 2, name: 'Matcha Latte', description: 'Ceremonial grade matcha with steamed milk.', price: '₱210.00', rating: 4.8 },
-    { id: 3, name: 'Blueberry Muffin', description: 'Freshly baked with wild blueberries.', price: '₱140.00', rating: 4.2, badge: 'New' },
-  ];
 
-  const nextRewardCost = Math.ceil((user.points + 1) / 100) * 100;
-  const progress = (user.points % 100);
-  const pointsToNext = nextRewardCost - user.points;
+  const tierConfig = TIER_CONFIG[user.membershipTier || 'Regular'] || TIER_CONFIG.Regular;
+  const tierInfo = user.tierInfo || {};
 
   useEffect(() => {
     refreshUser();
@@ -162,7 +151,7 @@ const HomeScreen = () => {
     const fetchData = async () => {
       setIsLoading(true);
       try {
-        const [rewardsRes, historyRes] = await Promise.allSettled([
+        const [rewardsRes, historyRes, productsRes] = await Promise.allSettled([
           fetch('/api/rewards?limit=3'),
           (() => {
             const rawProfile = localStorage.getItem('userProfile');
@@ -174,7 +163,8 @@ const HomeScreen = () => {
               });
             }
             return Promise.resolve(null);
-          })()
+          })(),
+          fetch('/api/products'),
         ]);
 
         if (rewardsRes.status === 'fulfilled' && rewardsRes.value?.ok) {
@@ -182,6 +172,14 @@ const HomeScreen = () => {
         }
         if (historyRes.status === 'fulfilled' && historyRes.value?.ok) {
           setHistory(await historyRes.value.json());
+        }
+        if (productsRes.status === 'fulfilled' && productsRes.value?.ok) {
+          const allProducts = await productsRes.value.json();
+          // Pick 3 featured products (bestsellers or popular items)
+          const featured = allProducts
+            .filter(p => p.badge && p.category !== 'Add-ons')
+            .slice(0, 3);
+          setFeaturedProducts(featured.length > 0 ? featured : allProducts.filter(p => p.category !== 'Add-ons').slice(0, 3));
         }
       } catch (error) {
         console.error('Failed to fetch data:', error);
@@ -210,18 +208,36 @@ const HomeScreen = () => {
           </div>
           <div>
             <h1 className="text-2xl sm:text-3xl font-bold text-gray-800 dark:text-white font-[Outfit]">Welcome back, {user.name}!</h1>
-            <p className="text-gray-500 dark:text-gray-400">Here's what's new for you today.</p>
-          </div>
-        </div>
-        <div className="w-full md:w-auto md:min-w-[280px] glass dark:glass bg-white/80 dark:bg-white/5 p-4 rounded-xl border border-gray-200/50 dark:border-white/10 shadow-sm">
-          <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Your Points</p>
-          <p className="text-3xl font-bold text-gradient animate-count-up">{user.points}</p>
-          <div className="w-full bg-gray-200 dark:bg-white/10 rounded-full h-2 mt-2 overflow-hidden">
-            <div className="bg-linear-to-r from-emerald-500 to-teal-400 h-2 rounded-full transition-all duration-1000 ease-out relative" style={{ width: `${progress}%` }}>
-              <div className="absolute inset-0 bg-white/20 animate-shimmer" />
+            <div className="flex items-center gap-2 mt-1">
+              <span className="text-lg">{tierConfig.emoji}</span>
+              <span className={`text-sm font-bold ${tierConfig.textColor}`}>{user.membershipTier || 'Regular'} Member</span>
+              <span className="text-gray-300 dark:text-gray-600">•</span>
+              <span className="text-sm text-gray-500 dark:text-gray-400">{tierInfo.multiplier || 1}× points</span>
             </div>
           </div>
-          <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">{pointsToNext} points to next reward</p>
+        </div>
+
+        {/* Points Card */}
+        <div className="w-full md:w-auto md:min-w-[300px] glass dark:glass bg-white/80 dark:bg-white/5 p-4 rounded-xl border border-gray-200/50 dark:border-white/10 shadow-sm">
+          <div className="flex items-center justify-between mb-1">
+            <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Your Points</p>
+            <Link to="/app/rewards" className="text-xs text-emerald-600 dark:text-emerald-400 hover:underline font-medium flex items-center gap-1">
+              <FiTrendingUp className="w-3 h-3" /> View Tier
+            </Link>
+          </div>
+          <p className="text-3xl font-bold text-gradient animate-count-up">{user.points}</p>
+          {tierInfo.nextTier && (
+            <>
+              <div className="w-full bg-gray-200 dark:bg-white/10 rounded-full h-2 mt-2 overflow-hidden">
+                <div className={`bg-linear-to-r ${tierConfig.color} h-2 rounded-full transition-all duration-1000 ease-out relative`} style={{ width: `${tierInfo.progress || 0}%` }}>
+                  <div className="absolute inset-0 bg-white/20 animate-shimmer" />
+                </div>
+              </div>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                ₱{((tierInfo.nextTierThreshold || 0) - (user.totalSpent || 0)).toLocaleString()} to {tierInfo.nextTier}
+              </p>
+            </>
+          )}
         </div>
       </div>
 
@@ -229,9 +245,9 @@ const HomeScreen = () => {
       <div className="mb-10">
         <h2 className="text-xl sm:text-2xl font-bold text-gray-800 dark:text-white mb-4 font-[Outfit]">Featured Offers</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-          <OfferCard title="New Member Perks" description="Enjoy a free drink on us for signing up." index={0} />
-          <OfferCard title="Exclusive 15% Off" description="Valid this weekend only. Show this offer in-store." index={1} />
-          <OfferCard title="Refer a Friend" description="Share your code and get 50 points." index={2} />
+          <OfferCard title="Earn More Points" description={`As a ${user.membershipTier || 'Regular'} member, earn ${tierInfo.multiplier || 1}× points on every order.`} index={0} />
+          <OfferCard title="Points = Savings" description="Use your points as ₱1 each to save on your next order." index={1} />
+          <OfferCard title="Rank Up Rewards" description="Spend more to unlock Silver, Gold, and Platinum tiers with exclusive perks." index={2} />
         </div>
       </div>
 
@@ -268,26 +284,14 @@ const HomeScreen = () => {
         </div>
       </div>
 
-      {/* Products to Explore */}
+      {/* Featured Products */}
       <div className="mt-10 animate-fade-in-up delay-500">
-        <div className="mb-6">
-          <h2 className="text-xl sm:text-2xl font-bold text-gray-800 dark:text-white mb-2 font-[Outfit]">Products to Explore</h2>
-          <div className="relative w-full md:max-w-xs">
-            <input type="search" placeholder="Search products..." className="w-full pl-4 pr-10 py-2.5 rounded-xl bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 focus:ring-emerald-500 focus:border-emerald-500 transition-all dark:text-white dark:placeholder:text-gray-600" />
-          </div>
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-xl sm:text-2xl font-bold text-gray-800 dark:text-white font-[Outfit]">Popular Drinks</h2>
+          <Link to="/app/products" className="text-sm text-emerald-600 dark:text-emerald-400 hover:underline font-medium">View Menu</Link>
         </div>
-
-        {/* Category Pills */}
-        <div className="flex items-center gap-2 mb-6 overflow-x-auto pb-2">
-          {['All', 'Coffee', 'Tea', 'Pastries'].map((cat, i) => (
-            <button key={cat} className={`px-4 py-2 font-medium text-sm rounded-full whitespace-nowrap transition-all duration-200 ${i === 0 ? 'bg-linear-to-r from-emerald-500 to-teal-500 text-white shadow-md shadow-emerald-500/20' : 'bg-gray-100 dark:bg-white/5 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-white/10'}`}>
-              {cat}
-            </button>
-          ))}
-        </div>
-
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-          {products.map(p => (
+          {featuredProducts.map(p => (
             <Link to="/app/products" key={p.id}>
               <ProductCard product={p} />
             </Link>

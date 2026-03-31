@@ -5,6 +5,7 @@ import logo from '../assets/logo.jpg';
 import { useUser } from './UserContext';
 import { FiMail, FiLock, FiEye, FiEyeOff } from 'react-icons/fi';
 import ThemeToggle from './ThemeToggle';
+import { GoogleLogin } from '@react-oauth/google';
 
 const Login = () => {
   const navigate = useNavigate();
@@ -56,6 +57,39 @@ const Login = () => {
     }
   };
 
+  const handleGoogleSuccess = async (credentialResponse) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await fetch('/api/auth/google', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ credential: credentialResponse.credential }),
+      });
+      const data = await response.json();
+      if (response.ok) {
+        const profile = data.user;
+        if (profile.role === 'admin') {
+          setError('Admin accounts must use the Admin Portal.');
+          setLoading(false);
+          return;
+        }
+        const { fullName: name, points, avatarUrl, role } = profile;
+        const initial = name ? name.charAt(0).toUpperCase() : 'U';
+        setUser({ name, initial, points, avatarUrl, role });
+        localStorage.setItem('userProfile', JSON.stringify(profile));
+        localStorage.setItem('token', data.token);
+        navigate('/app');
+      } else {
+        setError(data.message || 'Google login failed');
+      }
+    } catch (err) {
+      setError(err?.message || 'Google login failed');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <main className="min-h-screen bg-gray-50 dark:bg-[#060810] relative overflow-hidden flex items-center justify-center">
       {/* Animated background orbs */}
@@ -80,10 +114,18 @@ const Login = () => {
           </div>
 
           <div className="mt-6">
-            <button className="w-full inline-flex items-center justify-center px-4 py-2.5 rounded-xl bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 text-gray-700 dark:text-white font-medium hover:bg-gray-50 dark:hover:bg-white/10 transition-all duration-200 hover:shadow-md">
-              <svg className="w-5 h-5 mr-2" viewBox="0 0 48 48"><path fill="#FFC107" d="M43.611,20.083H42V20H24v8h11.303c-1.649,4.657-6.08,8-11.303,8c-6.627,0-12-5.373-12-12c0-6.627,5.373-12,12-12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C12.955,4,4,12.955,4,24s8.955,20,20,20s20-8.955,20-20C44,22.659,43.862,21.35,43.611,20.083z"></path><path fill="#FF3D00" d="M6.306,14.691l6.571,4.819C14.655,15.108,18.961,12,24,12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C16.318,4,9.656,8.337,6.306,14.691z"></path><path fill="#4CAF50" d="M24,44c5.166,0,9.86-1.977,13.409-5.192l-6.19-5.238C29.211,35.091,26.715,36,24,36c-5.202,0-9.619-3.317-11.283-7.946l-6.522,5.025C9.505,39.556,16.227,44,24,44z"></path><path fill="#1976D2" d="M43.611,20.083H42V20H24v8h11.303c-0.792,2.237-2.231,4.166-4.087,5.571l6.19,5.238C42.021,35.596,44,30.138,44,24C44,22.659,43.862,21.35,43.611,20.083z"></path></svg>
-              Sign in with Google
-            </button>
+            <div className="flex justify-center w-full">
+              <GoogleLogin
+                onSuccess={handleGoogleSuccess}
+                onError={() => setError('Google login failed. Please try again.')}
+                useOneTap
+                theme="filled_black"
+                size="large"
+                shape="rectangular"
+                text="signin_with"
+                width="350"
+              />
+            </div>
             <div className="my-6 flex items-center text-sm">
               <div className="grow border-t border-gray-200 dark:border-white/10"></div>
               <span className="mx-4 text-gray-400 dark:text-gray-500">OR</span>
@@ -118,7 +160,7 @@ const Login = () => {
                 <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-600 dark:text-gray-400">Remember me</label>
               </div>
               <div className="text-sm">
-                <a href="#" className="font-medium text-emerald-600 dark:text-emerald-400 hover:text-emerald-500">Forgot password?</a>
+                <Link to="/forgot-password" className="font-medium text-emerald-600 dark:text-emerald-400 hover:text-emerald-500">Forgot password?</Link>
               </div>
             </div>
 

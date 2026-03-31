@@ -1,7 +1,7 @@
 import React, { useMemo, useState, useRef, useEffect } from 'react';
 import PropTypes from 'prop-types';
-import { useUser } from './UserContext';
-import { FiFileText, FiEdit3, FiCamera, FiShield } from 'react-icons/fi';
+import { useUser, TIER_CONFIG } from './UserContext';
+import { FiFileText, FiEdit3, FiCamera, FiShield, FiTrendingUp } from 'react-icons/fi';
 import { ProfileSkeleton } from './SkeletonLoader.jsx';
 
 // Sub-component for Form Inputs
@@ -28,8 +28,8 @@ FormInput.propTypes = {
 const HistoryRow = ({ date, offer, points }) => (
   <tr className="border-b border-gray-100 dark:border-white/10 last:border-b-0 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors">
     <td className="py-4 pr-4 text-gray-500 dark:text-gray-400 text-sm">{date}</td>
-    <td className="py-4 px-4 text-gray-800 dark:text-gray-200 font-medium">{offer}</td>
-    <td className="py-4 pl-4 text-gray-800 dark:text-gray-200 font-medium text-right">{points}</td>
+    <td className="py-4 px-4 text-gray-800 dark:text-gray-200 font-medium text-sm">{offer}</td>
+    <td className={`py-4 pl-4 font-bold text-sm text-right ${parseInt(points) >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-500 dark:text-rose-400'}`}>{parseInt(points) > 0 ? `+${points}` : points}</td>
   </tr>
 );
 
@@ -62,9 +62,7 @@ const ProfileScreen = () => {
         try {
           const token = localStorage.getItem('token');
           const response = await fetch(`/api/history/${profile.id}`, {
-            headers: {
-              'Authorization': `Bearer ${token}`
-            }
+            headers: { 'Authorization': `Bearer ${token}` }
           });
           if (response.ok) {
             const data = await response.json();
@@ -115,11 +113,15 @@ const ProfileScreen = () => {
   const email = profile?.email || '';
   const dob = profile?.dob || '';
   const gender = profile?.gender || '';
-  const tier = profile?.membershipTier || 'Member';
-  const points = profile?.points || 0;
+  const tier = user.membershipTier || 'Regular';
+  const points = user.points || 0;
+  const totalSpent = user.totalSpent || 0;
+  const tierInfo = user.tierInfo || {};
+  const tierConfig = TIER_CONFIG[tier] || TIER_CONFIG.Regular;
 
-  const nextTierCost = 1000;
-  const progress = (points / nextTierCost) * 100;
+  const nextTierThreshold = tierInfo.nextTierThreshold || 0;
+  const progress = tierInfo.progress || 0;
+  const amountToNext = nextTierThreshold > 0 ? nextTierThreshold - totalSpent : 0;
 
   if (isLoading) {
     return (
@@ -140,13 +142,12 @@ const ProfileScreen = () => {
             className="relative w-20 h-20 rounded-full overflow-hidden cursor-pointer group shrink-0"
             onClick={handleAvatarClick}
           >
-            {/* Rotating gradient ring */}
-            <div className="absolute inset-[-3px] rounded-full bg-linear-to-r from-emerald-400 via-teal-400 to-emerald-400 animate-spin-slow opacity-80" />
+            <div className={`absolute inset-[-3px] rounded-full bg-linear-to-r ${tierConfig.color} animate-spin-slow opacity-80`} />
             <div className="absolute inset-[2px] rounded-full overflow-hidden bg-gray-100 dark:bg-gray-800 z-10">
               {avatar ? (
                 <img src={avatar} alt="User Avatar" className="w-full h-full object-cover" />
               ) : (
-                <div className="w-full h-full flex items-center justify-center bg-linear-to-br from-emerald-100 to-teal-100 dark:from-emerald-900/50 dark:to-teal-900/50">
+                <div className={`w-full h-full flex items-center justify-center bg-linear-to-br ${tierConfig.bgColor}`}>
                   <span className="text-3xl font-bold text-emerald-700 dark:text-emerald-400">{user.initial}</span>
                 </div>
               )}
@@ -155,20 +156,54 @@ const ProfileScreen = () => {
               <FiCamera className="w-5 h-5" />
             </div>
           </div>
-          <div className="text-center sm:text-left">
+          <div className="text-center sm:text-left flex-1">
             <h2 className="text-xl sm:text-2xl font-bold dark:text-white">{fullName || 'Your Name'}</h2>
             <div className="flex flex-wrap items-center justify-center sm:justify-start gap-3 mt-2">
-              <span className="bg-linear-to-r from-emerald-500/20 to-teal-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider">
-                {tier}
+              <span className={`bg-linear-to-r ${tierConfig.color} bg-clip-text text-transparent border ${tierConfig.borderColor} px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider flex items-center gap-1.5`}>
+                <span>{tierConfig.emoji}</span> {tier}
               </span>
               <span className="font-bold text-gradient text-lg">{points} Points</span>
             </div>
-            <div className="w-full max-w-xs bg-gray-200 dark:bg-white/10 rounded-full h-2 mt-3 overflow-hidden">
-              <div className="bg-linear-to-r from-emerald-500 to-teal-400 h-2 rounded-full transition-all duration-1000 relative" style={{ width: `${progress}%` }}>
-                <div className="absolute inset-0 bg-white/20 animate-shimmer" />
+            
+            {/* Tier Progress */}
+            {tierInfo.nextTier ? (
+              <div className="mt-3 max-w-sm">
+                <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400 mb-1">
+                  <span>{tier}</span>
+                  <span>{tierInfo.nextTier}</span>
+                </div>
+                <div className="w-full bg-gray-200 dark:bg-white/10 rounded-full h-2 overflow-hidden">
+                  <div className={`bg-linear-to-r ${tierConfig.color} h-2 rounded-full transition-all duration-1000 relative`} style={{ width: `${Math.min(progress, 100)}%` }}>
+                    <div className="absolute inset-0 bg-white/20 animate-shimmer" />
+                  </div>
+                </div>
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                  Spend <span className="font-bold text-emerald-600 dark:text-emerald-400">₱{amountToNext.toLocaleString()}</span> more to reach {tierInfo.nextTier}
+                </p>
               </div>
-            </div>
-            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">{nextTierCost - points} points to Platinum</p>
+            ) : (
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">🎉 Maximum tier reached! Total spent: ₱{totalSpent.toLocaleString()}</p>
+            )}
+          </div>
+        </div>
+
+        {/* Tier Stats Cards */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-8 animate-fade-in-up delay-100">
+          <div className="glass dark:glass bg-white/80 dark:bg-white/5 rounded-xl p-4 border border-gray-200/50 dark:border-white/10 text-center">
+            <p className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">{tierInfo.multiplier || 1}×</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Points Rate</p>
+          </div>
+          <div className="glass dark:glass bg-white/80 dark:bg-white/5 rounded-xl p-4 border border-gray-200/50 dark:border-white/10 text-center">
+            <p className="text-2xl font-bold text-amber-500">{tierInfo.discount || 0}%</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Discount</p>
+          </div>
+          <div className="glass dark:glass bg-white/80 dark:bg-white/5 rounded-xl p-4 border border-gray-200/50 dark:border-white/10 text-center">
+            <p className="text-2xl font-bold text-violet-500">{points}</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Points</p>
+          </div>
+          <div className="glass dark:glass bg-white/80 dark:bg-white/5 rounded-xl p-4 border border-gray-200/50 dark:border-white/10 text-center">
+            <p className="text-2xl font-bold text-gray-700 dark:text-gray-200">₱{totalSpent.toLocaleString()}</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Total Spent</p>
           </div>
         </div>
 

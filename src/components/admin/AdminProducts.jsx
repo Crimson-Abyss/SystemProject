@@ -176,7 +176,7 @@ const AdminProducts = () => {
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-3">
                            <div className="w-10 h-10 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-xl overflow-hidden shadow-inner">
-                              {item.imageUrl ? <img src={item.imageUrl} alt={item.name} className="w-full h-full object-cover" /> : (activeTab === 'products' ? '🧋' : '🎁')}
+                              {item.image ? <img src={item.image} alt={item.name} className="w-full h-full object-cover" /> : (activeTab === 'products' ? '🧋' : '🎁')}
                            </div>
                            <div>
                               <div className="font-bold text-white text-sm">{item.name || item.title}</div>
@@ -227,7 +227,7 @@ const AdminProducts = () => {
                 <div key={item.id} className="bg-white/ border border-white/ rounded-xl p-4 flex flex-col gap-3">
                     <div className="flex items-center gap-3">
                          <div className="w-12 h-12 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-xl overflow-hidden shadow-inner flex-shrink-0">
-                            {item.imageUrl ? <img src={item.imageUrl} alt={item.name} className="w-full h-full object-cover" /> : (activeTab === 'products' ? '🧋' : '🎁')}
+                            {item.image ? <img src={item.image} alt={item.name} className="w-full h-full object-cover" /> : (activeTab === 'products' ? '🧋' : '🎁')}
                          </div>
                          <div className="flex-1">
                              <div className="font-bold text-white">{item.name || item.title}</div>
